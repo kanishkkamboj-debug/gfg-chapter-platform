@@ -1,0 +1,15 @@
+# Database backup files
+*.dump
+*.sql.gz
+*.backup
+*.bak
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Misc
+.env
