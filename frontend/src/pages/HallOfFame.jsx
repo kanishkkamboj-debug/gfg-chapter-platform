@@ -117,7 +117,7 @@ export const HallOfFamePage = () => {
                 <TiltCard key={i} className="p-8 rounded-[2rem] border-t-purple-400/30">
                   <div className="flex gap-6 mb-6">
                     <div className="w-20 h-20 rounded-2xl bg-surface-container overflow-hidden shrink-0">
-                      <img src={`https://i.pravatar.cc/300?u=story${i}`} alt="Alumni" className="w-full h-full object-cover" />
+                      <img loading="lazy" src={`https://i.pravatar.cc/300?u=story${i}`} alt="Alumni" className="w-full h-full object-cover" />
                     </div>
                     <div>
                       <h3 className="text-xl font-bold text-white mb-1">Jane Doe</h3>

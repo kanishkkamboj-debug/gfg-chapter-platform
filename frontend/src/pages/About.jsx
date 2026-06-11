@@ -114,7 +114,7 @@ export const AboutPage = () => {
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(250,204,21,0.05),transparent_50%)]"></div>
             
             <div className="w-40 h-40 shrink-0 rounded-full overflow-hidden border-4 border-yellow-400/30 shadow-[0_0_30px_rgba(250,204,21,0.2)]">
-              <img src="https://i.pravatar.cc/300?u=faculty" alt="Faculty Coordinator" className="w-full h-full object-cover" />
+              <img loading="lazy" src="https://i.pravatar.cc/300?u=faculty" alt="Faculty Coordinator" className="w-full h-full object-cover" />
             </div>
             
             <div className="flex-1 text-center md:text-left z-10">

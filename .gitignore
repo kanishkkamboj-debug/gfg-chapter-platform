@@ -41,8 +41,6 @@ build/
 out/
 
 # Node/npm
-package-lock.json
-yarn.lock
 .npm
 
 # Python

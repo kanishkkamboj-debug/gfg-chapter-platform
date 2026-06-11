@@ -4,11 +4,14 @@
 CREATE TABLE users (
   id SERIAL PRIMARY KEY,
   email VARCHAR(255) UNIQUE NOT NULL,
-  password_hash VARCHAR(255) NOT NULL,
+  password_hash VARCHAR(255),
   username VARCHAR(100) UNIQUE NOT NULL,
   full_name VARCHAR(255) NOT NULL,
   role VARCHAR(50) DEFAULT 'member',
   avatar_url TEXT,
+  google_id VARCHAR(255) UNIQUE,
+  github_id VARCHAR(255) UNIQUE,
+  auth_provider VARCHAR(50) DEFAULT 'local',
   bio TEXT,
   joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -40,7 +43,7 @@ CREATE TABLE events (
   end_date TIMESTAMP NOT NULL,
   location VARCHAR(255),
   registration_link TEXT,
-  capacity INTEGER,
+  capacity INTEGER CHECK (capacity > 0),
   registered_count INTEGER DEFAULT 0,
   image_url TEXT,
   organizer_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -148,3 +151,10 @@ CREATE INDEX idx_gallery_items_event_id ON gallery_items(event_id);
 CREATE INDEX idx_resources_category ON resources(category);
 CREATE INDEX idx_hall_of_fame_user_id ON hall_of_fame(user_id);
 CREATE INDEX idx_support_tickets_status ON support_tickets(status);
+CREATE INDEX idx_users_role ON users(role);
+CREATE INDEX idx_team_members_department ON team_members(department);
+CREATE INDEX idx_events_organizer_id ON events(organizer_id);
+CREATE INDEX idx_gallery_items_uploaded_by ON gallery_items(uploaded_by);
+CREATE INDEX idx_resources_created_by ON resources(created_by);
+CREATE INDEX idx_support_tickets_assigned_to ON support_tickets(assigned_to);
+CREATE INDEX idx_team_members_user_id ON team_members(user_id);

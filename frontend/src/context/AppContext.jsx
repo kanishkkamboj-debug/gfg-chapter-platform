@@ -5,13 +5,33 @@ const AppContext = createContext();
 export const AppProvider = ({ children }) => {
   // Authentication state
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('token') || null);
-  const [isAuthenticated, setIsAuthenticated] = useState(!!token);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   // UI state
   const [darkMode, setDarkMode] = useState(localStorage.getItem('darkMode') === 'true');
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Verify auth on mount
+  useEffect(() => {
+    const verifyAuth = async () => {
+      try {
+        const response = await fetch('/api/auth/verify', { method: 'POST', credentials: 'include' });
+        if (response.ok) {
+          const data = await response.json();
+          if (data.valid) {
+            setUser(data.user);
+            setIsAuthenticated(true);
+          }
+        }
+      } catch (err) {
+        console.error('Verify failed:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    verifyAuth();
+  }, []);
 
   // Persistent User Data (Mocking backend via localStorage)
   const [solvedProblems, setSolvedProblems] = useState(() => {
@@ -35,16 +55,20 @@ export const AppProvider = ({ children }) => {
   const login = useCallback(async (email, password) => {
     setLoading(true); setError(null);
     try {
-      // Mock login since no backend
-      const mockUser = { id: 1, email, full_name: 'Developer', role: 'student' };
-      const mockToken = 'mock-jwt-token-123';
-      
-      setToken(mockToken);
-      setUser(mockUser);
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ email, password })
+      });
+      if (!response.ok) throw new Error('Login failed');
+      const data = await response.json();
+      setUser(data.user);
       setIsAuthenticated(true);
-      localStorage.setItem('token', mockToken);
-      localStorage.setItem('user', JSON.stringify(mockUser));
-      return { user: mockUser, token: mockToken };
+      return { user: data.user };
+    } catch (err) {
+      setError(err.message);
+      throw err;
     } finally {
       setLoading(false);
     }
@@ -53,26 +77,33 @@ export const AppProvider = ({ children }) => {
   const register = useCallback(async (email, password, username, fullName) => {
     setLoading(true); setError(null);
     try {
-      const mockUser = { id: 2, email, username, full_name: fullName, role: 'student' };
-      const mockToken = 'mock-jwt-token-456';
-      
-      setToken(mockToken);
-      setUser(mockUser);
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ email, password, username, full_name: fullName })
+      });
+      if (!response.ok) throw new Error('Registration failed');
+      const data = await response.json();
+      setUser(data.user);
       setIsAuthenticated(true);
-      localStorage.setItem('token', mockToken);
-      localStorage.setItem('user', JSON.stringify(mockUser));
-      return { user: mockUser, token: mockToken };
+      return { user: data.user };
+    } catch (err) {
+      setError(err.message);
+      throw err;
     } finally {
       setLoading(false);
     }
   }, []);
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+    } catch (err) {
+      console.error(err);
+    }
     setUser(null);
-    setToken(null);
     setIsAuthenticated(false);
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
   }, []);
 
   // Progress Tracking Actions
@@ -95,7 +126,7 @@ export const AppProvider = ({ children }) => {
   }, []);
 
   const value = {
-    user, token, isAuthenticated, loading, error, setError,
+    user, isAuthenticated, loading, error, setError,
     login, register, logout,
     solvedProblems, toggleProblemStatus,
     completedRoadmapNodes, toggleRoadmapNode,

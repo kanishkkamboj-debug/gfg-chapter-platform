@@ -57,7 +57,7 @@ export const HomePage = () => {
               <div className="flex -space-x-3">
                 {[1, 2, 3, 4].map((i) => (
                   <div key={i} className={`w-10 h-10 rounded-full border-2 border-[#0a1118] overflow-hidden bg-surface-container relative z-[${10-i}]`}>
-                    <img src={`https://i.pravatar.cc/100?img=${i+10}`} alt="Member" className="w-full h-full object-cover" />
+                    <img loading="lazy" src={`https://i.pravatar.cc/100?img=${i+10}`} alt="Member" className="w-full h-full object-cover" />
                   </div>
                 ))}
               </div>
@@ -177,36 +177,77 @@ export const HomePage = () => {
         </div>
       </section>
       
-      {/* Reusable Global Components (Placeholders for remaining Home requirements) */}
+      {/* Reusable Global Components (Dynamic Data) */}
       <section className="py-20 relative z-10 bg-[#0a1118]">
         <div className="container-max">
            <ScrollReveal>
               <h2 className="text-3xl font-display font-bold text-white mb-10 text-center">Community Ecosystem</h2>
               <div className="grid md:grid-cols-2 gap-8">
-                 <div className="bg-[#0c1610] p-8 rounded-3xl border border-[#1a3324]">
-                    <h3 className="text-[#00FF88] font-bold mb-4 flex items-center gap-2"><span className="material-symbols-outlined">campaign</span> Recent Announcements</h3>
-                    <ul className="space-y-4">
-                      {['Winter Hackathon 2025 Registration', 'Core Team Interviews Open', 'New React Roadmap Published'].map((ann, i) => (
-                        <li key={i} className="text-[#a3b8cc] text-sm flex items-center gap-3 pb-4 border-b border-[#1a3324] last:border-0 last:pb-0"><span className="w-2 h-2 rounded-full bg-[#00FF88]"></span> {ann}</li>
-                      ))}
-                    </ul>
+                 <div className="bg-[#0c1610] p-8 rounded-3xl border border-[#1a3324] hover:shadow-neon transition-shadow">
+                    <h3 className="text-[#00FF88] font-bold mb-4 flex items-center gap-2"><span className="material-symbols-outlined">campaign</span> Global Transmissions</h3>
+                    <RecentAnnouncements />
                  </div>
-                 <div className="bg-[#0c1610] p-8 rounded-3xl border border-[#1a3324]">
-                    <h3 className="text-[#00FF88] font-bold mb-4 flex items-center gap-2"><span className="material-symbols-outlined">emoji_events</span> Hall of Fame Preview</h3>
-                    <div className="space-y-4">
-                      {['Alex Kumar - Grandmaster', 'Sarah Chen - Master', 'David Byte - Expert'].map((user, i) => (
-                        <div key={i} className="flex justify-between items-center text-[#a3b8cc] text-sm pb-4 border-b border-[#1a3324] last:border-0 last:pb-0">
-                          <span className="text-white font-bold">{user.split(' - ')[0]}</span>
-                          <span className="font-mono text-[#00FF88]">{user.split(' - ')[1]}</span>
-                        </div>
-                      ))}
-                    </div>
+                 <div className="bg-[#0c1610] p-8 rounded-3xl border border-[#1a3324] hover:shadow-neon transition-shadow">
+                    <h3 className="text-[#00FF88] font-bold mb-4 flex items-center gap-2"><span className="material-symbols-outlined">event</span> Upcoming Objectives</h3>
+                    <UpcomingEvents />
                  </div>
               </div>
            </ScrollReveal>
         </div>
       </section>
 
+    </div>
+  );
+};
+
+const RecentAnnouncements = () => {
+  const [announcements, setAnnouncements] = React.useState([]);
+  React.useEffect(() => {
+    fetch('/api/search/announcements?q=')
+      .then(res => res.json())
+      .then(data => setAnnouncements(data.slice(0, 3)))
+      .catch(() => {});
+  }, []);
+
+  if (announcements.length === 0) return <div className="text-[#a3b8cc] text-sm">No recent transmissions intercepted.</div>;
+
+  return (
+    <ul className="space-y-4">
+      {announcements.map((ann, i) => (
+        <li key={i} className="text-[#a3b8cc] text-sm flex items-start gap-3 pb-4 border-b border-[#1a3324] last:border-0 last:pb-0">
+          <span className="w-2 h-2 rounded-full bg-[#00FF88] mt-1.5 shrink-0"></span> 
+          <div>
+            <div className="text-white font-bold">{ann.title}</div>
+            <div className="text-xs text-[#a3b8cc]/80 mt-1 line-clamp-1">{ann.description}</div>
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
+};
+
+const UpcomingEvents = () => {
+  const [events, setEvents] = React.useState([]);
+  React.useEffect(() => {
+    fetch('/api/search/events?q=')
+      .then(res => res.json())
+      .then(data => setEvents(data.slice(0, 3)))
+      .catch(() => {});
+  }, []);
+
+  if (events.length === 0) return <div className="text-[#a3b8cc] text-sm">No upcoming objectives scheduled.</div>;
+
+  return (
+    <div className="space-y-4">
+      {events.map((event, i) => (
+        <div key={i} className="flex justify-between items-center text-[#a3b8cc] text-sm pb-4 border-b border-[#1a3324] last:border-0 last:pb-0">
+          <div>
+            <div className="text-white font-bold">{event.title}</div>
+            <div className="text-xs text-[#a3b8cc]/80 mt-1">{new Date(event.start_date).toLocaleDateString()}</div>
+          </div>
+          <span className="font-mono text-[#00FF88] bg-[#00FF88]/10 px-2 py-1 rounded text-xs border border-[#00FF88]/30">Open</span>
+        </div>
+      ))}
     </div>
   );
 };

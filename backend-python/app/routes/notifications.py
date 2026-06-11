@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from sqlalchemy import text
 from datetime import datetime, timedelta
 from pydantic import BaseModel
+from app.models import Event, EventRegistration, Announcement
 
 router = APIRouter(prefix="/api/notifications", tags=["notifications"])
 
@@ -22,52 +22,34 @@ def get_db():
 
 @router.get("/upcoming-events")
 async def get_upcoming_events(days: int = 7, db: Session = Depends(get_db)):
-    """Get upcoming events for notification purposes"""
+    days = min(max(days, 0), 365)
     future_date = datetime.now() + timedelta(days=days)
     
-    events = db.execute(
-        text("""
-            SELECT id, title, start_date, description 
-            FROM events 
-            WHERE start_date BETWEEN NOW() AND :future_date
-            ORDER BY start_date ASC
-        """),
-        {"future_date": future_date}
-    ).fetchall()
+    events = db.query(Event.id, Event.title, Event.start_date, Event.description).filter(
+        Event.start_date >= datetime.now(),
+        Event.start_date <= future_date
+    ).order_by(Event.start_date.asc()).all()
     
-    return [dict(row._mapping) for row in events]
+    return [{"id": e.id, "title": e.title, "start_date": e.start_date, "description": e.description} for e in events]
 
 @router.get("/event-reminders/{user_id}")
 async def get_event_reminders(user_id: int, db: Session = Depends(get_db)):
-    """Get event reminders for a specific user"""
-    reminders = db.execute(
-        text("""
-            SELECT e.id, e.title, e.start_date, e.location
-            FROM events e
-            JOIN event_registrations er ON e.id = er.event_id
-            WHERE er.user_id = :user_id
-            AND e.start_date > NOW()
-            AND e.start_date <= NOW() + INTERVAL '7 days'
-            ORDER BY e.start_date ASC
-        """),
-        {"user_id": user_id}
-    ).fetchall()
+    reminders = db.query(Event.id, Event.title, Event.start_date, Event.location).join(
+        EventRegistration, Event.id == EventRegistration.event_id
+    ).filter(
+        EventRegistration.user_id == user_id,
+        Event.start_date > datetime.now(),
+        Event.start_date <= datetime.now() + timedelta(days=7)
+    ).order_by(Event.start_date.asc()).all()
     
-    return [dict(row._mapping) for row in reminders]
+    return [{"id": r.id, "title": r.title, "start_date": r.start_date, "location": r.location} for r in reminders]
 
 @router.get("/new-announcements/{user_id}")
 async def get_new_announcements(user_id: int, db: Session = Depends(get_db)):
-    """Get recent announcements for user notification"""
-    announcements = db.execute(
-        text("""
-            SELECT id, title, description, created_at, priority
-            FROM announcements
-            WHERE created_at >= NOW() - INTERVAL '24 hours'
-            AND (category = 'important' OR priority = 'high')
-            ORDER BY created_at DESC
-            LIMIT 5
-        """)
-    ).fetchall()
+    one_day_ago = datetime.now() - timedelta(hours=24)
+    announcements = db.query(Announcement.id, Announcement.title, Announcement.description, Announcement.created_at, Announcement.priority).filter(
+        Announcement.created_at >= one_day_ago,
+        (Announcement.category == 'important') | (Announcement.priority == 'high')
+    ).order_by(Announcement.created_at.desc()).limit(5).all()
     
-    return [dict(row._mapping) for row in announcements]
-
+    return [{"id": a.id, "title": a.title, "description": a.description, "created_at": a.created_at, "priority": a.priority} for a in announcements]

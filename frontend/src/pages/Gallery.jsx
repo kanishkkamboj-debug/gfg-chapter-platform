@@ -90,7 +90,7 @@ export const GalleryPage = () => {
               className="break-inside-avoid relative rounded-3xl overflow-hidden cursor-pointer group border border-[#1a3324] hover:border-[#00FF88]/50 transition-colors bg-[#0c1610]"
               onClick={() => setSelectedImage(img)}
             >
-              <img src={img.src} alt={img.title} className="w-full h-auto object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700" />
+              <img loading="lazy" src={img.src} alt={img.title} className="w-full h-auto object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700" />
               <div className="absolute inset-0 bg-gradient-to-t from-[#0a1118] via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
                  <span className="material-symbols-outlined text-white text-3xl mb-2 translate-y-4 group-hover:translate-y-0 transition-transform duration-300">zoom_in</span>
                  <h3 className="text-white font-bold translate-y-4 group-hover:translate-y-0 transition-transform duration-300 delay-75">{img.title}</h3>

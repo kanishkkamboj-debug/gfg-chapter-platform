@@ -3,6 +3,9 @@ import { useApp } from '../context/AppContext';
 import ScrollReveal from '../components/ScrollReveal';
 import TiltCard from '../components/TiltCard';
 import { motion, AnimatePresence } from 'framer-motion';
+import AdminTransmissions from '../components/admin/AdminTransmissions';
+import AdminEvents from '../components/admin/AdminEvents';
+import AdminUsers from '../components/admin/AdminUsers';
 
 export const DashboardPage = ({ isAdmin = false }) => {
   const { user } = useApp();
@@ -19,6 +22,7 @@ export const DashboardPage = ({ isAdmin = false }) => {
 
   const adminTabs = [
     { id: 'dashboard', icon: 'dashboard', label: 'Overview Dashboard' },
+    { id: 'transmissions', icon: 'mail', label: 'Transmissions' },
     { id: 'analytics', icon: 'analytics', label: 'Analytics Dashboard' },
     { id: 'events-mgmt', icon: 'event_upcoming', label: 'Event Management' },
     { id: 'announcements', icon: 'campaign', label: 'Announcements' },
@@ -108,16 +112,16 @@ export const DashboardPage = ({ isAdmin = false }) => {
                    <div className="bg-[#0c1610] p-8 rounded-3xl border border-[#1a3324]">
                       <h3 className="text-xl font-bold text-white mb-4">Ordinary Duty Leave</h3>
                       <p className="text-[#a3b8cc] text-sm mb-6">Apply for DL for standard event participation.</p>
-                      <button className="w-full py-3 bg-[#00FF88] text-[#0a1118] font-bold rounded-xl mb-4">Apply Now</button>
-                      <button className="w-full py-3 border border-[#1a3324] text-white font-bold rounded-xl mb-4">View Status</button>
-                      <button className="w-full py-3 text-xs font-mono text-[#00FF88] hover:underline flex items-center justify-center gap-2"><span className="material-symbols-outlined text-[16px]">download</span> Download Approved Letter</button>
+                      <button onClick={() => alert('Application submitted')} className="w-full py-3 bg-[#00FF88] text-[#0a1118] font-bold rounded-xl mb-4 hover:shadow-[0_0_15px_rgba(0,255,136,0.5)] transition-all hover:-translate-y-1">Apply Now</button>
+                      <button onClick={() => alert('No active applications')} className="w-full py-3 border border-[#1a3324] text-white font-bold rounded-xl mb-4 hover:bg-[#112218] transition-colors">View Status</button>
+                      <button onClick={() => alert('No letters available')} className="w-full py-3 text-xs font-mono text-[#00FF88] hover:text-white transition-colors flex items-center justify-center gap-2"><span className="material-symbols-outlined text-[16px]">download</span> Download Approved Letter</button>
                    </div>
                    <div className="bg-[#0c1610] p-8 rounded-3xl border border-[#1a3324]">
                       <h3 className="text-xl font-bold text-white mb-4">Special Duty Leave</h3>
                       <p className="text-[#a3b8cc] text-sm mb-6">Apply for out-station hackathons and major representations.</p>
-                      <button className="w-full py-3 bg-[#00D4FF] text-[#0a1118] font-bold rounded-xl mb-4">Apply Now</button>
-                      <button className="w-full py-3 border border-[#1a3324] text-white font-bold rounded-xl mb-4">View Status</button>
-                      <button className="w-full py-3 text-xs font-mono text-[#00D4FF] hover:underline flex items-center justify-center gap-2"><span className="material-symbols-outlined text-[16px]">download</span> Download Approved Letter</button>
+                      <button onClick={() => alert('Special Application submitted')} className="w-full py-3 bg-[#00D4FF] text-[#0a1118] font-bold rounded-xl mb-4 hover:shadow-[0_0_15px_rgba(0,212,255,0.5)] transition-all hover:-translate-y-1">Apply Now</button>
+                      <button onClick={() => alert('No active applications')} className="w-full py-3 border border-[#1a3324] text-white font-bold rounded-xl mb-4 hover:bg-[#112218] transition-colors">View Status</button>
+                      <button onClick={() => alert('No letters available')} className="w-full py-3 text-xs font-mono text-[#00D4FF] hover:text-white transition-colors flex items-center justify-center gap-2"><span className="material-symbols-outlined text-[16px]">download</span> Download Approved Letter</button>
                    </div>
                 </div>
                 <div className="bg-[#112218] p-6 rounded-2xl border border-[#1a3324] flex items-center justify-between text-sm">
@@ -196,15 +200,33 @@ export const DashboardPage = ({ isAdmin = false }) => {
                          <tr><th className="p-4">Student</th><th className="p-4">Type</th><th className="p-4">Event</th><th className="p-4">Actions</th></tr>
                       </thead>
                       <tbody className="divide-y divide-[#1a3324]">
-                         <tr className="hover:bg-[#112218] transition-colors"><td className="p-4 text-white">John Doe</td><td className="p-4 text-[#00D4FF]">Special DL</td><td className="p-4 text-[#a3b8cc]">Regional Hackathon</td><td className="p-4 flex gap-2"><button className="px-3 py-1 bg-[#00FF88]/20 text-[#00FF88] rounded text-xs hover:bg-[#00FF88] hover:text-[#0a1118]">Approve</button><button className="px-3 py-1 bg-red-500/20 text-red-500 rounded text-xs hover:bg-red-500 hover:text-white">Reject</button><button className="px-3 py-1 border border-[#1a3324] text-white rounded text-xs">Gen PDF</button></td></tr>
+                         <tr className="hover:bg-[#112218] transition-colors"><td className="p-4 text-white">John Doe</td><td className="p-4 text-[#00D4FF]">Special DL</td><td className="p-4 text-[#a3b8cc]">Regional Hackathon</td><td className="p-4 flex gap-2"><button onClick={() => alert('Approved')} className="px-3 py-1 bg-[#00FF88]/20 text-[#00FF88] rounded text-xs hover:bg-[#00FF88] hover:text-[#0a1118] transition-colors">Approve</button><button onClick={() => alert('Rejected')} className="px-3 py-1 bg-red-500/20 text-red-500 rounded text-xs hover:bg-red-500 hover:text-white transition-colors">Reject</button><button onClick={() => alert('Generating PDF...')} className="px-3 py-1 border border-[#1a3324] text-white rounded text-xs hover:bg-white hover:text-black transition-colors">Gen PDF</button></td></tr>
                       </tbody>
                    </table>
                 </div>
              </motion.div>
           )}
 
+          {isAdmin && activeTab === 'transmissions' && (
+             <motion.div key="admin-transmissions" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+               <AdminTransmissions />
+             </motion.div>
+          )}
+
+          {isAdmin && activeTab === 'events-mgmt' && (
+             <motion.div key="admin-events" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+               <AdminEvents />
+             </motion.div>
+          )}
+
+          {isAdmin && activeTab === 'users' && (
+             <motion.div key="admin-users" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+               <AdminUsers />
+             </motion.div>
+          )}
+
           {/* Fallback for other tabs */}
-          {activeTab !== 'dashboard' && activeTab !== 'duty-leave' && activeTab !== 'analytics' && activeTab !== 'duty-leave-mgmt' && (
+          {activeTab !== 'dashboard' && activeTab !== 'duty-leave' && activeTab !== 'analytics' && activeTab !== 'duty-leave-mgmt' && activeTab !== 'transmissions' && activeTab !== 'events-mgmt' && activeTab !== 'users' && (
              <motion.div key="fallback" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="bg-[#0c1610] p-12 rounded-3xl border border-[#1a3324] text-center">
                 <span className="material-symbols-outlined text-4xl text-[#1a3324] mb-4">construction</span>
                 <h3 className="text-xl font-bold text-white mb-2">Module Provisioned</h3>

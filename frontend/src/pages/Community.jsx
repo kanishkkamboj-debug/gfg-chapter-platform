@@ -26,7 +26,7 @@ export const CommunityPage = () => {
         <ScrollReveal delay={0.1}>
           <div className="glass-card p-10 rounded-[3rem] border-t-[#5865F2]/50 relative overflow-hidden group h-full">
             <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
-              <img src="https://assets-global.website-files.com/6257adef93867e50d84d30e2/636e0a69f118df70ad7828d4_icon_clyde_blurple_RGB.svg" alt="Discord" className="w-32 h-32" />
+              <img loading="lazy" src="https://assets-global.website-files.com/6257adef93867e50d84d30e2/636e0a69f118df70ad7828d4_icon_clyde_blurple_RGB.svg" alt="Discord" className="w-32 h-32" />
             </div>
             <div className="relative z-10">
               <h3 className="text-3xl font-bold text-white mb-4">Official Discord</h3>

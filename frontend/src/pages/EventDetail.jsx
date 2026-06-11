@@ -32,7 +32,7 @@ export const EventDetailPage = () => {
     <div className="relative min-h-screen pt-24 pb-12 z-10">
       <div className="absolute top-0 left-0 w-full h-[60vh] z-0 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background z-10"></div>
-        <img src={event.img} alt={event.title} className="w-full h-full object-cover opacity-30" />
+        <img loading="lazy" src={event.img} alt={event.title} className="w-full h-full object-cover opacity-30" />
       </div>
 
       <div className="container-max relative z-20">

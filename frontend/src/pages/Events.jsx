@@ -71,7 +71,7 @@ export const EventsPage = () => {
               <motion.div key="events" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-6">
                  <TiltCard className="p-8 flex flex-col md:flex-row gap-8 rounded-3xl border-t-accent-cyan/30 items-center">
                     <div className="w-full md:w-48 h-48 rounded-2xl bg-surface-container border border-border-low-opacity flex items-center justify-center overflow-hidden relative">
-                      <img src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&q=80&w=600" className="opacity-50 object-cover w-full h-full" alt="Hackathon" />
+                      <img loading="lazy" src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&q=80&w=600" className="opacity-50 object-cover w-full h-full" alt="Hackathon" />
                       <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent"></div>
                     </div>
                     <div className="flex-1">
@@ -98,7 +98,7 @@ export const EventsPage = () => {
                 <div className="columns-1 md:columns-3 gap-4 space-y-4">
                   {[1, 2, 3, 4, 5, 6].map(i => (
                     <div key={i} className="break-inside-avoid relative group rounded-2xl overflow-hidden border border-border-low-opacity cursor-pointer">
-                      <img src={`https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80&w=500&sig=${i}`} alt="Gallery" className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500 opacity-70 group-hover:opacity-100" />
+                      <img loading="lazy" src={`https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80&w=500&sig=${i}`} alt="Gallery" className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500 opacity-70 group-hover:opacity-100" />
                       <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                         <span className="material-symbols-outlined text-white text-4xl">zoom_in</span>
                       </div>

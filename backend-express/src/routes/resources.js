@@ -4,6 +4,7 @@ const pool = require('../db');
 const { z } = require('zod');
 const validate = require('../middleware/validate');
 const authMiddleware = require('../middleware/auth');
+const requireRole = require('../middleware/rbac');
 
 const getResourcesQuerySchema = z.object({
   category: z.string().optional(),
@@ -65,7 +66,7 @@ router.get('/', validate({ query: getResourcesQuerySchema }), async (req, res) =
 });
 
 // Create resource (Requires Auth)
-router.post('/', authMiddleware, validate({ body: createResourceSchema }), async (req, res) => {
+router.post('/', authMiddleware, requireRole(['admin']), validate({ body: createResourceSchema }), async (req, res) => {
   const { title, description, category, resource_type, link, file_url } = req.body;
   const created_by = req.user.id;
 

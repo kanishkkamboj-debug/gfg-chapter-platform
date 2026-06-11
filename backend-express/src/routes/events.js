@@ -4,6 +4,7 @@ const pool = require('../db');
 const { z } = require('zod');
 const validate = require('../middleware/validate');
 const authMiddleware = require('../middleware/auth');
+const requireRole = require('../middleware/rbac');
 
 const getEventsQuerySchema = z.object({
   page: z.string().regex(/^\d+$/).transform(Number).default('1'),
@@ -46,12 +47,20 @@ router.get('/', validate({ query: getEventsQuerySchema }), async (req, res) => {
     query += ` AND (e.title ILIKE $${params.length} OR e.description ILIKE $${params.length})`;
   }
 
+  let countQuery = 'SELECT COUNT(*) FROM events e JOIN users u ON e.organizer_id = u.id WHERE 1=1';
+  if (upcoming) countQuery += ' AND e.start_date > NOW()';
+  if (event_type) countQuery += ` AND e.event_type = $1`;
+  if (search) countQuery += ` AND (e.title ILIKE $${event_type ? 2 : 1} OR e.description ILIKE $${event_type ? 2 : 1})`;
+  
+  // params array has [event_type?, search?] before limit and offset are pushed
+  const countParams = params.slice(0, params.length);
+
   query += ' ORDER BY e.start_date ASC LIMIT $' + (params.length + 1) + ' OFFSET $' + (params.length + 2);
   params.push(limit, offset);
 
   const result = await pool.query(query, params);
   
-  const countResult = await pool.query('SELECT COUNT(*) FROM events WHERE start_date > NOW()');
+  const countResult = await pool.query(countQuery, countParams);
   const total = parseInt(countResult.rows[0].count);
 
   res.json({
@@ -67,9 +76,12 @@ router.get('/', validate({ query: getEventsQuerySchema }), async (req, res) => {
 
 // Get single event
 router.get('/:id', async (req, res) => {
+  const eventId = parseInt(req.params.id);
+  if (isNaN(eventId)) return res.status(400).json({ error: 'Invalid event ID format' });
+
   const result = await pool.query(
     'SELECT e.*, u.username, u.full_name FROM events e JOIN users u ON e.organizer_id = u.id WHERE e.id = $1',
-    [req.params.id]
+    [eventId]
   );
 
   if (result.rows.length === 0) {
@@ -80,7 +92,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // Create event
-router.post('/', authMiddleware, validate({ body: createEventSchema }), async (req, res) => {
+router.post('/', authMiddleware, requireRole(['admin']), validate({ body: createEventSchema }), async (req, res) => {
   const { title, description, event_type, start_date, end_date, location, capacity, image_url } = req.body;
   const organizer_id = req.user.id;
 
@@ -96,8 +108,11 @@ router.post('/', authMiddleware, validate({ body: createEventSchema }), async (r
 
 // Register for event
 router.post('/:id/register', authMiddleware, async (req, res) => {
+  const eventId = parseInt(req.params.id);
+  if (isNaN(eventId)) return res.status(400).json({ error: 'Invalid event ID format' });
+
   const user_id = req.user.id;
-  const event_id = req.params.id;
+  const event_id = eventId;
 
   const existing = await pool.query(
     'SELECT * FROM event_registrations WHERE event_id = $1 AND user_id = $2',
@@ -113,10 +128,19 @@ router.post('/:id/register', authMiddleware, async (req, res) => {
     [event_id, user_id]
   );
 
-  await pool.query(
-    'UPDATE events SET registered_count = registered_count + 1 WHERE id = $1',
+  const updated = await pool.query(
+    `UPDATE events 
+     SET registered_count = registered_count + 1 
+     WHERE id = $1 AND (capacity IS NULL OR registered_count < capacity) 
+     RETURNING id`,
     [event_id]
   );
+
+  if (updated.rows.length === 0) {
+    // If no row was updated, it's either an invalid event ID or it's at capacity.
+    // We already checked the event ID existence above, so it must be capacity.
+    return res.status(400).json({ error: 'Event is at full capacity' });
+  }
 
   global.broadcastUpdate('events', { type: 'registration', event_id });
 
@@ -125,8 +149,11 @@ router.post('/:id/register', authMiddleware, async (req, res) => {
 
 // Unregister from event
 router.post('/:id/unregister', authMiddleware, async (req, res) => {
+  const eventId = parseInt(req.params.id);
+  if (isNaN(eventId)) return res.status(400).json({ error: 'Invalid event ID format' });
+
   const user_id = req.user.id;
-  const event_id = req.params.id;
+  const event_id = eventId;
 
   const deleted = await pool.query(
     'DELETE FROM event_registrations WHERE event_id = $1 AND user_id = $2 RETURNING id',

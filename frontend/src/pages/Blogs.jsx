@@ -40,7 +40,7 @@ export const BlogsPage = () => {
             {/* Author Page Link / Header */}
             <div className="flex items-center gap-4 border-b border-border-low-opacity pb-8 mb-8 cursor-pointer group">
               <div className="w-12 h-12 rounded-full overflow-hidden bg-surface-container">
-                <img src="https://i.pravatar.cc/150?u=author1" alt="Author" className="w-full h-full object-cover" />
+                <img loading="lazy" src="https://i.pravatar.cc/150?u=author1" alt="Author" className="w-full h-full object-cover" />
               </div>
               <div>
                 <h4 className="font-bold text-white group-hover:text-accent-cyan transition-colors">Alex Kumar</h4>
@@ -140,7 +140,7 @@ export default async function NoteList() {
                 ].map((post, i) => (
                   <TiltCard key={i} className="p-0 rounded-[2rem] border-t-accent-cyan/30 overflow-hidden flex flex-col h-full group cursor-pointer" onClick={() => setSelectedPost(i)}>
                     <div className="h-48 bg-surface-bright relative overflow-hidden">
-                      <img src={`https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=600&sig=${i}`} className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700" alt="Post" />
+                      <img loading="lazy" src={`https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=600&sig=${i}`} className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700" alt="Post" />
                     </div>
                     <div className="p-6 flex-1 flex flex-col">
                       <div className="flex justify-between items-center text-xs font-mono text-text-muted mb-4">
@@ -150,7 +150,7 @@ export default async function NoteList() {
                       <h3 className="text-xl font-bold text-white mb-3 group-hover:text-accent-cyan transition-colors">{post.title}</h3>
                       <p className="text-sm text-text-muted mb-6 flex-1">{post.desc}</p>
                       <div className="flex items-center gap-3 mt-auto pt-4 border-t border-border-low-opacity/50">
-                        <div className="w-8 h-8 rounded-full bg-surface-container overflow-hidden"><img src={`https://i.pravatar.cc/150?u=${i}`} alt="Author" className="w-full h-full object-cover" /></div>
+                        <div className="w-8 h-8 rounded-full bg-surface-container overflow-hidden"><img loading="lazy" src={`https://i.pravatar.cc/150?u=${i}`} alt="Author" className="w-full h-full object-cover" /></div>
                         <span className="text-sm font-medium text-white">Alex Kumar</span>
                       </div>
                     </div>
@@ -164,7 +164,7 @@ export default async function NoteList() {
                 {[1, 2].map(i => (
                   <TiltCard key={i} className="p-6 md:p-8 rounded-3xl border-t-purple-400/30 flex flex-col md:flex-row gap-8 items-center cursor-pointer group" onClick={() => setSelectedPost(i)}>
                     <div className="w-full md:w-64 h-48 rounded-2xl bg-surface-container overflow-hidden shrink-0">
-                      <img src={`https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80&w=600&sig=${i+10}`} className="w-full h-full object-cover opacity-70 group-hover:scale-105 transition-transform duration-700" alt="Report" />
+                      <img loading="lazy" src={`https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80&w=600&sig=${i+10}`} className="w-full h-full object-cover opacity-70 group-hover:scale-105 transition-transform duration-700" alt="Report" />
                     </div>
                     <div className="flex-1">
                       <span className="text-xs font-mono text-purple-400 uppercase tracking-wider mb-2 block">Event Post-Mortem</span>

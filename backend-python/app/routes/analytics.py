@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from sqlalchemy import text
+from sqlalchemy import func
 from datetime import datetime, timedelta
+from app.models import User, Event, Announcement, EventRegistration, Resource
 
 router = APIRouter(prefix="/api/analytics", tags=["analytics"])
 
@@ -15,39 +16,17 @@ def get_db():
 
 @router.get("/dashboard")
 async def analytics_dashboard(db: Session = Depends(get_db)):
-    """
-    Get analytics dashboard data - all from database, no hardcoding
-    """
-    # Total users
-    total_users = db.execute(text("SELECT COUNT(*) as count FROM users")).scalar()
+    total_users = db.query(func.count(User.id)).scalar()
+    total_events = db.query(func.count(Event.id)).scalar()
+    total_announcements = db.query(func.count(Announcement.id)).scalar()
     
-    # Total events
-    total_events = db.execute(text("SELECT COUNT(*) as count FROM events")).scalar()
-    
-    # Total announcements
-    total_announcements = db.execute(text("SELECT COUNT(*) as count FROM announcements")).scalar()
-    
-    # Events this month
     this_month = datetime.now().replace(day=1)
-    events_this_month = db.execute(
-        text("SELECT COUNT(*) as count FROM events WHERE start_date >= :start_date"),
-        {"start_date": this_month}
-    ).scalar()
+    events_this_month = db.query(func.count(Event.id)).filter(Event.start_date >= this_month).scalar()
     
-    # Recent registrations
-    recent_registrations = db.execute(
-        text("SELECT COUNT(*) as count FROM event_registrations WHERE registered_at >= NOW() - INTERVAL '7 days'")
-    ).scalar()
+    seven_days_ago = datetime.now() - timedelta(days=7)
+    recent_registrations = db.query(func.count(EventRegistration.id)).filter(EventRegistration.registered_at >= seven_days_ago).scalar()
     
-    # Top events by registration
-    top_events = db.execute(
-        text("""
-            SELECT e.id, e.title, e.registered_count 
-            FROM events e 
-            ORDER BY e.registered_count DESC 
-            LIMIT 5
-        """)
-    ).fetchall()
+    top_events = db.query(Event.id, Event.title, Event.registered_count).order_by(Event.registered_count.desc()).limit(5).all()
     
     return {
         "total_users": total_users,
@@ -55,41 +34,36 @@ async def analytics_dashboard(db: Session = Depends(get_db)):
         "total_announcements": total_announcements,
         "events_this_month": events_this_month,
         "recent_registrations": recent_registrations,
-        "top_events": [dict(row._mapping) for row in top_events]
+        "top_events": [{"id": e.id, "title": e.title, "registered_count": e.registered_count} for e in top_events]
     }
 
 @router.get("/user-activity")
 async def user_activity(days: int = 30, db: Session = Depends(get_db)):
-    """Get user activity analytics"""
-    activity = db.execute(
-        text("""
-            SELECT 
-                DATE(registered_at) as date,
-                COUNT(*) as registrations
-            FROM event_registrations
-            WHERE registered_at >= NOW() - make_interval(days => :days)
-            GROUP BY DATE(registered_at)
-            ORDER BY date DESC
-        """),
-        {"days": days}
-    ).fetchall()
+    cutoff = datetime.now() - timedelta(days=days)
     
-    return [dict(row._mapping) for row in activity]
+    activity = db.query(
+        func.date(EventRegistration.registered_at).label("date"),
+        func.count(EventRegistration.id).label("registrations")
+    ).filter(
+        EventRegistration.registered_at >= cutoff
+    ).group_by(
+        func.date(EventRegistration.registered_at)
+    ).order_by(
+        func.date(EventRegistration.registered_at).desc()
+    ).all()
+    
+    return [{"date": str(a.date), "registrations": a.registrations} for a in activity]
 
 @router.get("/engagement-metrics")
 async def engagement_metrics(db: Session = Depends(get_db)):
-    """Get engagement metrics from database"""
-    # Most viewed resources
-    most_viewed = db.execute(
-        text("SELECT id, title, views FROM resources ORDER BY views DESC LIMIT 10")
-    ).fetchall()
+    most_viewed = db.query(Resource.id, Resource.title, Resource.views).order_by(Resource.views.desc()).limit(10).all()
     
-    # Resource categories distribution
-    categories = db.execute(
-        text("SELECT category, COUNT(*) as count FROM resources GROUP BY category")
-    ).fetchall()
+    categories = db.query(
+        Resource.category, 
+        func.count(Resource.id).label("count")
+    ).group_by(Resource.category).all()
     
     return {
-        "most_viewed_resources": [dict(row._mapping) for row in most_viewed],
-        "resource_categories": [dict(row._mapping) for row in categories]
+        "most_viewed_resources": [{"id": r.id, "title": r.title, "views": r.views} for r in most_viewed],
+        "resource_categories": [{"category": c.category, "count": c.count} for c in categories]
     }

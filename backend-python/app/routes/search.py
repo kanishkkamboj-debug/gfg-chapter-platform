@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
-from sqlalchemy import text
+from app.models import User, Event, Announcement, Resource, TeamMember
 
 router = APIRouter(prefix="/api/search", tags=["search"])
 
@@ -14,81 +14,51 @@ def get_db():
 
 @router.get("/global")
 async def global_search(q: str = Query(..., min_length=1), db: Session = Depends(get_db)):
-    """
-    Global search across announcements, events, resources, and team members
-    Returns dynamic results from database
-    """
     search_term = f"%{q}%"
     
-    # Search announcements
-    announcements = db.execute(
-        text("SELECT 'announcement' as type, id, title, description FROM announcements WHERE title ILIKE :q OR description ILIKE :q LIMIT 5"),
-        {"q": search_term}
-    ).fetchall()
+    announcements = db.query(Announcement.id, Announcement.title, Announcement.description).filter(
+        Announcement.title.ilike(search_term) | Announcement.description.ilike(search_term)
+    ).limit(5).all()
     
-    # Search events
-    events = db.execute(
-        text("SELECT 'event' as type, id, title, description FROM events WHERE title ILIKE :q OR description ILIKE :q LIMIT 5"),
-        {"q": search_term}
-    ).fetchall()
+    events = db.query(Event.id, Event.title, Event.description).filter(
+        Event.title.ilike(search_term) | Event.description.ilike(search_term)
+    ).limit(5).all()
     
-    # Search resources
-    resources = db.execute(
-        text("SELECT 'resource' as type, id, title, description FROM resources WHERE title ILIKE :q OR description ILIKE :q LIMIT 5"),
-        {"q": search_term}
-    ).fetchall()
+    resources = db.query(Resource.id, Resource.title, Resource.description).filter(
+        Resource.title.ilike(search_term) | Resource.description.ilike(search_term)
+    ).limit(5).all()
     
-    # Search team members
-    team = db.execute(
-        text("""
-            SELECT 'team' as type, tm.id, u.full_name as title, tm.designation as description 
-            FROM team_members tm 
-            JOIN users u ON tm.user_id = u.id 
-            WHERE u.full_name ILIKE :q OR tm.designation ILIKE :q 
-            LIMIT 5
-        """),
-        {"q": search_term}
-    ).fetchall()
+    team = db.query(TeamMember.id, User.full_name.label('title'), TeamMember.designation.label('description')).join(User).filter(
+        User.full_name.ilike(search_term) | TeamMember.designation.ilike(search_term)
+    ).limit(5).all()
     
-    results = {
-        "announcements": [dict(row._mapping) for row in announcements],
-        "events": [dict(row._mapping) for row in events],
-        "resources": [dict(row._mapping) for row in resources],
-        "team": [dict(row._mapping) for row in team]
+    return {
+        "announcements": [{"type": "announcement", "id": a.id, "title": a.title, "description": a.description} for a in announcements],
+        "events": [{"type": "event", "id": e.id, "title": e.title, "description": e.description} for e in events],
+        "resources": [{"type": "resource", "id": r.id, "title": r.title, "description": r.description} for r in resources],
+        "team": [{"type": "team", "id": t.id, "title": t.title, "description": t.description} for t in team]
     }
-    
-    return results
 
 @router.get("/announcements")
 async def search_announcements(q: str = Query(...), db: Session = Depends(get_db)):
-    """Search announcements by title or description"""
     search_term = f"%{q}%"
-    results = db.execute(
-        text("""
-            SELECT a.*, u.full_name, u.username 
-            FROM announcements a 
-            JOIN users u ON a.author_id = u.id 
-            WHERE a.title ILIKE :q OR a.description ILIKE :q 
-            ORDER BY a.created_at DESC
-        """),
-        {"q": search_term}
-    ).fetchall()
+    results = db.query(
+        Announcement.id, Announcement.title, Announcement.description, Announcement.created_at,
+        User.full_name, User.username
+    ).join(User, Announcement.author_id == User.id).filter(
+        Announcement.title.ilike(search_term) | Announcement.description.ilike(search_term)
+    ).order_by(Announcement.created_at.desc()).all()
     
-    return [dict(row._mapping) for row in results]
+    return [{"id": r.id, "title": r.title, "description": r.description, "created_at": r.created_at, "full_name": r.full_name, "username": r.username} for r in results]
 
 @router.get("/events")
 async def search_events(q: str = Query(...), db: Session = Depends(get_db)):
-    """Search events by title or description"""
     search_term = f"%{q}%"
-    results = db.execute(
-        text("""
-            SELECT e.*, u.full_name, u.username 
-            FROM events e 
-            JOIN users u ON e.organizer_id = u.id 
-            WHERE e.title ILIKE :q OR e.description ILIKE :q 
-            ORDER BY e.start_date ASC
-        """),
-        {"q": search_term}
-    ).fetchall()
+    results = db.query(
+        Event.id, Event.title, Event.description, Event.start_date,
+        User.full_name, User.username
+    ).join(User, Event.organizer_id == User.id).filter(
+        Event.title.ilike(search_term) | Event.description.ilike(search_term)
+    ).order_by(Event.start_date.asc()).all()
     
-    return [dict(row._mapping) for row in results]
+    return [{"id": r.id, "title": r.title, "description": r.description, "start_date": r.start_date, "full_name": r.full_name, "username": r.username} for r in results]

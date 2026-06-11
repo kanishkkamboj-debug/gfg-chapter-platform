@@ -4,6 +4,7 @@ const pool = require('../db');
 const { z } = require('zod');
 const validate = require('../middleware/validate');
 const authMiddleware = require('../middleware/auth');
+const requireRole = require('../middleware/rbac');
 
 const getGalleryQuerySchema = z.object({
   category: z.string().optional(),
@@ -38,12 +39,18 @@ router.get('/', validate({ query: getGalleryQuerySchema }), async (req, res) => 
     query += ` AND gi.event_id = $${params.length}`;
   }
 
+  let countQuery = 'SELECT COUNT(*) FROM gallery_items gi JOIN users u ON gi.uploaded_by = u.id WHERE 1=1';
+  if (category) countQuery += ` AND gi.category = $1`;
+  if (event_id) countQuery += ` AND gi.event_id = $${category ? 2 : 1}`;
+
+  const countParams = params.slice(0, params.length);
+
   query += ' ORDER BY gi.created_at DESC LIMIT $' + (params.length + 1) + ' OFFSET $' + (params.length + 2);
   params.push(limit, offset);
 
   const result = await pool.query(query, params);
   
-  const countResult = await pool.query('SELECT COUNT(*) FROM gallery_items');
+  const countResult = await pool.query(countQuery, countParams);
   const total = parseInt(countResult.rows[0].count);
 
   res.json({
@@ -58,7 +65,7 @@ router.get('/', validate({ query: getGalleryQuerySchema }), async (req, res) => 
 });
 
 // Upload gallery item (Requires Auth)
-router.post('/', authMiddleware, validate({ body: uploadGalleryItemSchema }), async (req, res) => {
+router.post('/', authMiddleware, requireRole(['admin']), validate({ body: uploadGalleryItemSchema }), async (req, res) => {
   const { title, description, image_url, category, event_id } = req.body;
   const uploaded_by = req.user.id;
 
@@ -73,8 +80,11 @@ router.post('/', authMiddleware, validate({ body: uploadGalleryItemSchema }), as
 });
 
 // Delete gallery item (Requires Auth)
-router.delete('/:id', authMiddleware, async (req, res) => {
-  const result = await pool.query('DELETE FROM gallery_items WHERE id = $1 RETURNING id', [req.params.id]);
+router.delete('/:id', authMiddleware, requireRole(['admin']), async (req, res) => {
+  const galId = parseInt(req.params.id);
+  if (isNaN(galId)) return res.status(400).json({ error: 'Invalid ID format' });
+
+  const result = await pool.query('DELETE FROM gallery_items WHERE id = $1 RETURNING id', [galId]);
 
   if (result.rows.length === 0) {
     return res.status(404).json({ error: 'Gallery item not found' });

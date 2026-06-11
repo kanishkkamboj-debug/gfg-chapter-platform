@@ -4,6 +4,7 @@ const pool = require('../db');
 const { z } = require('zod');
 const validate = require('../middleware/validate');
 const authMiddleware = require('../middleware/auth');
+const requireRole = require('../middleware/rbac');
 
 const getAnnouncementsQuerySchema = z.object({
   page: z.string().regex(/^\d+$/).transform(Number).default('1'),
@@ -43,12 +44,18 @@ router.get('/', validate({ query: getAnnouncementsQuerySchema }), async (req, re
     query += ` AND (a.title ILIKE $${params.length} OR a.description ILIKE $${params.length})`;
   }
 
+  let countQuery = 'SELECT COUNT(*) FROM announcements a JOIN users u ON a.author_id = u.id WHERE 1=1';
+  if (category) countQuery += ` AND a.category = $1`;
+  if (search) countQuery += ` AND (a.title ILIKE $${category ? 2 : 1} OR a.description ILIKE $${category ? 2 : 1})`;
+
+  const countParams = params.slice(0, params.length);
+
   query += ' ORDER BY a.is_pinned DESC, a.created_at DESC LIMIT $' + (params.length + 1) + ' OFFSET $' + (params.length + 2);
   params.push(limit, offset);
 
   const result = await pool.query(query, params);
   
-  const countResult = await pool.query('SELECT COUNT(*) FROM announcements');
+  const countResult = await pool.query(countQuery, countParams);
   const total = parseInt(countResult.rows[0].count);
 
   res.json({
@@ -64,9 +71,12 @@ router.get('/', validate({ query: getAnnouncementsQuerySchema }), async (req, re
 
 // Get single announcement
 router.get('/:id', async (req, res) => {
+  const annId = parseInt(req.params.id);
+  if (isNaN(annId)) return res.status(400).json({ error: 'Invalid ID format' });
+
   const result = await pool.query(
     'SELECT a.*, u.username, u.full_name FROM announcements a JOIN users u ON a.author_id = u.id WHERE a.id = $1',
-    [req.params.id]
+    [annId]
   );
 
   if (result.rows.length === 0) {
@@ -77,7 +87,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // Create announcement (Requires Auth)
-router.post('/', authMiddleware, validate({ body: createAnnouncementSchema }), async (req, res) => {
+router.post('/', authMiddleware, requireRole(['admin']), validate({ body: createAnnouncementSchema }), async (req, res) => {
   const { title, description, content, category, priority, image_url } = req.body;
   const author_id = req.user.id;
 
@@ -92,12 +102,15 @@ router.post('/', authMiddleware, validate({ body: createAnnouncementSchema }), a
 });
 
 // Update announcement (Requires Auth)
-router.put('/:id', authMiddleware, validate({ body: updateAnnouncementSchema }), async (req, res) => {
+router.put('/:id', authMiddleware, requireRole(['admin']), validate({ body: updateAnnouncementSchema }), async (req, res) => {
+  const annId = parseInt(req.params.id);
+  if (isNaN(annId)) return res.status(400).json({ error: 'Invalid ID format' });
+
   const { title, description, content, category, priority, is_pinned } = req.body;
   
   const result = await pool.query(
     'UPDATE announcements SET title = COALESCE($1, title), description = COALESCE($2, description), content = COALESCE($3, content), category = COALESCE($4, category), priority = COALESCE($5, priority), is_pinned = COALESCE($6, is_pinned), updated_at = CURRENT_TIMESTAMP WHERE id = $7 RETURNING *',
-    [title, description, content, category, priority, is_pinned, req.params.id]
+    [title, description, content, category, priority, is_pinned, annId]
   );
 
   if (result.rows.length === 0) {
@@ -110,8 +123,11 @@ router.put('/:id', authMiddleware, validate({ body: updateAnnouncementSchema }),
 });
 
 // Delete announcement (Requires Auth)
-router.delete('/:id', authMiddleware, async (req, res) => {
-  const result = await pool.query('DELETE FROM announcements WHERE id = $1 RETURNING id', [req.params.id]);
+router.delete('/:id', authMiddleware, requireRole(['admin']), async (req, res) => {
+  const annId = parseInt(req.params.id);
+  if (isNaN(annId)) return res.status(400).json({ error: 'Invalid ID format' });
+
+  const result = await pool.query('DELETE FROM announcements WHERE id = $1 RETURNING id', [annId]);
 
   if (result.rows.length === 0) {
     return res.status(404).json({ error: 'Announcement not found' });

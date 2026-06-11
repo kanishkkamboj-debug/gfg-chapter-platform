@@ -96,6 +96,29 @@ export const LoginPage = () => {
             </button>
           </form>
 
+          <div className="my-8 flex items-center">
+            <div className="flex-grow border-t border-border-low-opacity"></div>
+            <span className="flex-shrink-0 mx-4 text-text-muted text-xs uppercase tracking-widest font-mono">Or Continue With</span>
+            <div className="flex-grow border-t border-border-low-opacity"></div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 mb-8">
+            <a
+              href="http://localhost:5000/api/auth/google"
+              className="flex items-center justify-center gap-3 py-3.5 rounded-2xl bg-surface-container border border-border-low-opacity hover:border-accent-mint hover:bg-white/5 transition-all text-white font-medium group"
+            >
+              <img loading="lazy" src="https://www.google.com/favicon.ico" alt="Google" className="w-5 h-5 group-hover:scale-110 transition-transform" />
+              Google
+            </a>
+            <a
+              href="http://localhost:5000/api/auth/github"
+              className="flex items-center justify-center gap-3 py-3.5 rounded-2xl bg-surface-container border border-border-low-opacity hover:border-accent-mint hover:bg-white/5 transition-all text-white font-medium group"
+            >
+              <img loading="lazy" src="https://github.githubassets.com/favicons/favicon.png" alt="GitHub" className="w-5 h-5 filter invert group-hover:scale-110 transition-transform" />
+              GitHub
+            </a>
+          </div>
+
           <div className="mt-8 text-center text-sm text-text-muted">
             New to the network? <Link to="/register" className="text-white hover:text-accent-mint transition-colors ml-1 border-b border-border-low-opacity hover:border-accent-mint">Initialize profile</Link>
           </div>

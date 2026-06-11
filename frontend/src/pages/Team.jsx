@@ -62,7 +62,7 @@ export const TeamPage = () => {
              <TiltCard className="max-w-2xl w-full p-12 rounded-[3rem] border-t-yellow-400/30 flex flex-col md:flex-row gap-8 items-center bg-gradient-to-br from-surface to-surface-container relative overflow-hidden group">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(250,204,21,0.05),transparent_50%)] opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
                 <div className="w-48 h-48 shrink-0 rounded-full overflow-hidden border-4 border-yellow-400/30 shadow-[0_0_30px_rgba(250,204,21,0.2)]">
-                  <img src="https://i.pravatar.cc/300?u=faculty" alt="Faculty" className="w-full h-full object-cover" />
+                  <img loading="lazy" src="https://i.pravatar.cc/300?u=faculty" alt="Faculty" className="w-full h-full object-cover" />
                 </div>
                 <div className="flex-1 text-center md:text-left z-10">
                   <h2 className="text-3xl font-display font-bold text-white mb-2">Dr. Alan Turing</h2>
@@ -93,7 +93,7 @@ export const TeamPage = () => {
               <TiltCard key={i} className={`p-8 rounded-[2rem] border-t-${member.color}/30 text-center relative group`}>
                  <div className={`absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.05),transparent_50%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500`}></div>
                  <div className={`w-32 h-32 mx-auto rounded-full overflow-hidden mb-6 border-2 border-${member.color}/30`}>
-                   <img src={member.img} alt={member.name} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" />
+                   <img loading="lazy" src={member.img} alt={member.name} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" />
                  </div>
                  <h3 className="text-xl font-bold text-white mb-1">{member.name}</h3>
                  <div className={`text-xs font-mono uppercase text-${member.color} mb-4`}>{member.role}</div>

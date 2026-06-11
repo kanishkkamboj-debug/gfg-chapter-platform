@@ -13,7 +13,7 @@ export const AnnouncementDetailPage = () => {
     const fetchAnnouncement = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`/api/announcements/${id}`);
+        const response = await fetch(`/api/announcements/${id}`, { credentials: 'include' });
         if (!response.ok) throw new Error('Failed to load announcement');
         const data = await response.json();
         setAnnouncement(data);
@@ -61,7 +61,7 @@ export const AnnouncementDetailPage = () => {
 
           {announcement.image_url && (
             <div className="rounded-xl overflow-hidden mb-8 border border-border-low-opacity">
-              <img src={announcement.image_url} alt="" className="w-full h-auto object-cover max-h-96" />
+              <img loading="lazy" src={announcement.image_url} alt="" className="w-full h-auto object-cover max-h-96" />
             </div>
           )}
 

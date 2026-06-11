@@ -82,6 +82,11 @@ const Navigation = () => {
           <div className="hidden md:flex items-center gap-4">
             {isAuthenticated ? (
               <div className="flex items-center gap-4">
+                {user?.role === 'admin' && (
+                  <Link to="/admin" className="text-xs font-bold font-mono tracking-widest uppercase text-accent-mint hover:text-white transition-colors border border-accent-mint/30 px-3 py-1.5 rounded-md bg-accent-mint/10">
+                    Admin Panel
+                  </Link>
+                )}
                 <Link to="/dashboard" className="flex items-center gap-2 px-4 py-2 rounded-full border border-border-low-opacity hover:border-accent-mint transition-colors">
                   <div className="w-6 h-6 rounded-full bg-surface-container flex items-center justify-center">
                     <span className="material-symbols-outlined text-[14px] text-accent-mint">person</span>
@@ -159,6 +164,11 @@ const Navigation = () => {
               >
                 {isAuthenticated ? (
                   <>
+                    {user?.role === 'admin' && (
+                      <Link to="/admin" className="w-full py-4 rounded-xl bg-accent-mint/10 border border-accent-mint/30 text-accent-mint text-center font-bold tracking-widest uppercase">
+                        Admin Panel
+                      </Link>
+                    )}
                     <Link to="/dashboard" className="w-full py-4 rounded-xl border border-border-low-opacity text-center text-white font-bold">
                       Dashboard
                     </Link>

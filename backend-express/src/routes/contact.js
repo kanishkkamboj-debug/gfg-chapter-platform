@@ -4,6 +4,18 @@ const pool = require('../db');
 const { z } = require('zod');
 const validate = require('../middleware/validate');
 const authMiddleware = require('../middleware/auth');
+const requireRole = require('../middleware/rbac');
+const { contactLimiter } = require('../middleware/rateLimiter');
+const nodemailer = require('nodemailer');
+
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST || 'smtp.ethereal.email',
+  port: process.env.SMTP_PORT || 587,
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS
+  }
+});
 
 const submitContactSchema = z.object({
   name: z.string().min(1),
@@ -20,7 +32,7 @@ const getTicketsQuerySchema = z.object({
 });
 
 // Submit contact form (Public)
-router.post('/', validate({ body: submitContactSchema }), async (req, res) => {
+router.post('/', contactLimiter, validate({ body: submitContactSchema }), async (req, res) => {
   const { name, email, subject, message, category } = req.body;
 
   const result = await pool.query(
@@ -34,7 +46,7 @@ router.post('/', validate({ body: submitContactSchema }), async (req, res) => {
 });
 
 // Get contact/support tickets (admin only)
-router.get('/', authMiddleware, validate({ query: getTicketsQuerySchema }), async (req, res) => {
+router.get('/', authMiddleware, requireRole(['admin']), validate({ query: getTicketsQuerySchema }), async (req, res) => {
   const { status, page, limit } = req.query;
   const offset = (page - 1) * limit;
 
@@ -63,6 +75,42 @@ router.get('/', authMiddleware, validate({ query: getTicketsQuerySchema }), asyn
       pages: Math.ceil(total / limit)
     }
   });
+});
+
+// Reply to a ticket and mark as closed
+const replySchema = z.object({
+  reply_message: z.string().min(1)
+});
+
+router.post('/:id/reply', authMiddleware, requireRole(['admin']), validate({ body: replySchema }), async (req, res) => {
+  const { id } = req.params;
+  const { reply_message } = req.body;
+
+  // Get ticket
+  const ticketResult = await pool.query('SELECT * FROM support_tickets WHERE id = $1', [id]);
+  const ticket = ticketResult.rows[0];
+
+  if (!ticket) return res.status(404).json({ error: 'Ticket not found' });
+
+  try {
+    // Send email
+    await transporter.sendMail({
+      from: `"GFG Chapter Admin" <${process.env.SMTP_USER || 'admin@gfgchapter.org'}>`,
+      to: ticket.email,
+      subject: `Re: ${ticket.subject}`,
+      text: `Hello ${ticket.name},\n\n${reply_message}\n\n--\nGFG Chapter Admin Team`
+    });
+
+    // Mark ticket as resolved/closed
+    await pool.query('UPDATE support_tickets SET status = $1 WHERE id = $2', ['closed', id]);
+
+    global.broadcastUpdate('contact', { type: 'ticket_replied', id });
+
+    res.json({ success: true, message: 'Reply sent and ticket closed' });
+  } catch (err) {
+    console.error('Email error:', err);
+    res.status(500).json({ error: 'Failed to send email' });
+  }
 });
 
 module.exports = router;

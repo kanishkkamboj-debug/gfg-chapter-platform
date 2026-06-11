@@ -139,7 +139,7 @@ export const EventsList = () => {
                   {/* Event Header / Image */}
                   <div className="h-48 relative overflow-hidden bg-surface-container-high shrink-0">
                     {event.image_url ? (
-                      <img src={event.image_url} alt="" className="w-full h-full object-cover opacity-80" />
+                      <img loading="lazy" src={event.image_url} alt="" className="w-full h-full object-cover opacity-80" />
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-surface-bright to-surface-container-highest flex items-center justify-center opacity-80">
                         <Calendar size={48} className="text-border-low-opacity" />

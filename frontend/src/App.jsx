@@ -5,6 +5,7 @@ import { AppProvider, useApp } from './context/AppContext';
 import Navigation from './components/Navigation';
 import GlobalScene from './components/GlobalScene';
 import CustomCursor from './components/CustomCursor';
+import ErrorBoundary from './components/ErrorBoundary';
 
 // Lazy-loaded Pages
 const HomePage = lazy(() => import('./pages/Home'));
@@ -101,7 +102,8 @@ const AnimatedRoutes = () => {
 
   return (
     <AnimatePresence mode="wait">
-      <Suspense fallback={<LoadingFallback />}>
+      <ErrorBoundary>
+        <Suspense fallback={<LoadingFallback />}>
         <Routes location={location} key={location.pathname}>
           <Route path="/" element={<PageWrapper><HomePage /></PageWrapper>} />
           <Route path="/login" element={<PageWrapper><LoginPage /></PageWrapper>} />
@@ -141,6 +143,7 @@ const AnimatedRoutes = () => {
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </Suspense>
+      </ErrorBoundary>
     </AnimatePresence>
   );
 };
@@ -188,8 +191,8 @@ const Footer = () => (
             <div>
               <h4 className="font-mono text-xs font-semibold text-white mb-6 uppercase tracking-wider">Legal</h4>
               <ul className="space-y-4 text-text-muted text-sm">
-                <li><Link to="#" className="hover:text-accent-mint transition-colors inline-block">Community Guidelines</Link></li>
-                <li><Link to="#" className="hover:text-accent-mint transition-colors inline-block">Privacy Protocol</Link></li>
+                <li><Link to="/about" className="hover:text-accent-mint transition-colors inline-block">Community Guidelines</Link></li>
+                <li><Link to="/about" className="hover:text-accent-mint transition-colors inline-block">Privacy Protocol</Link></li>
                 <li>
                   <Link to="/contact" className="text-accent-mint hover:text-white flex items-center gap-2 transition-colors mt-8 group">
                     <span>Contact Protocol</span>

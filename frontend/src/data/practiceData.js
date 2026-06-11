@@ -1,4 +1,4 @@
-export const mockProblems = [
+export const practiceProblems = [
   { id: 'p1', title: 'Two Sum', difficulty: 'Easy', tags: ['Array', 'Hash Table'], link: 'https://leetcode.com/problems/two-sum', group: 'Array' },
   { id: 'p2', title: 'Best Time to Buy and Sell Stock', difficulty: 'Easy', tags: ['Array'], link: 'https://leetcode.com/problems/best-time-to-buy-and-sell-stock', group: 'Array' },
   { id: 'p3', title: 'Contains Duplicate', difficulty: 'Easy', tags: ['Array', 'Hash Table'], link: 'https://leetcode.com/problems/contains-duplicate', group: 'Array' },

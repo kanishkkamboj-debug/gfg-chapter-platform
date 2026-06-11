@@ -3,8 +3,55 @@ import { useApp } from '../context/AppContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import ScrollReveal from '../components/ScrollReveal';
 import TiltCard from '../components/TiltCard';
-import { mockProblems } from '../data/mockPracticeData';
+import TiltCard from '../components/TiltCard';
+import { practiceProblems } from '../data/practiceData';
 
+const ProblemCard = React.memo(({ problem, isSolved, toggleProblemStatus }) => (
+  <div className={`p-6 rounded-2xl border transition-all duration-300 ${
+    isSolved ? 'bg-accent-mint/5 border-accent-mint/30' : 'glass-card hover:border-accent-cyan/30'
+  }`}>
+    <div className="flex justify-between items-start mb-4">
+      <h4 className="text-lg font-bold text-white flex-1 mr-4 group">
+        <a href={problem.link} target="_blank" rel="noreferrer" className="hover:text-accent-cyan transition-colors inline-flex items-center gap-2">
+          {problem.title}
+          <span className="material-symbols-outlined text-[14px] opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all">open_in_new</span>
+        </a>
+      </h4>
+      <button
+        onClick={() => toggleProblemStatus(problem.id)}
+        className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 border transition-all ${
+          isSolved 
+            ? 'bg-accent-mint border-accent-mint text-background shadow-[0_0_10px_#00FF88]' 
+            : 'bg-surface-container border-border-low-opacity text-transparent hover:border-text-muted'
+        }`}
+      >
+        <span className="material-symbols-outlined text-sm">check</span>
+      </button>
+    </div>
+    
+    <div className="flex items-center gap-3">
+      <span className={`px-2 py-1 rounded text-[10px] font-mono uppercase tracking-wider ${
+        problem.difficulty === 'Easy' ? 'bg-accent-mint/10 text-accent-mint' :
+        problem.difficulty === 'Medium' ? 'bg-yellow-400/10 text-yellow-400' :
+        'bg-error/10 text-error'
+      }`}>
+        {problem.difficulty}
+      </span>
+      <div className="flex flex-wrap gap-2 flex-1">
+        {problem.tags.slice(0, 2).map(tag => (
+          <span key={tag} className="text-xs text-text-muted bg-surface-container-high px-2 py-1 rounded">
+            {tag}
+          </span>
+        ))}
+        {problem.tags.length > 2 && (
+          <span className="text-xs text-text-muted bg-surface-container-high px-2 py-1 rounded">
+            +{problem.tags.length - 2}
+          </span>
+        )}
+      </div>
+    </div>
+  </div>
+));
 export const PracticePortal = () => {
   const { solvedProblems, toggleProblemStatus } = useApp();
   const [activeList, setActiveList] = useState('Blind 75');
@@ -14,7 +61,7 @@ export const PracticePortal = () => {
   const lists = ['Blind 75', 'Neetcode 150', 'Striver SDE Sheet', 'GFG Essentials'];
 
   const filteredProblems = useMemo(() => {
-    return mockProblems.filter(p => {
+    return practiceProblems.filter(p => {
       const matchesSearch = p.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
                             p.tags.some(t => t.toLowerCase().includes(searchQuery.toLowerCase()));
       const matchesDifficulty = difficultyFilter === 'All' || p.difficulty === difficultyFilter;
@@ -25,7 +72,7 @@ export const PracticePortal = () => {
   const groups = [...new Set(filteredProblems.map(p => p.group))];
 
   const totalSolved = solvedProblems.length;
-  const progressPercentage = (totalSolved / mockProblems.length) * 100;
+  const progressPercentage = (totalSolved / practiceProblems.length) * 100;
 
   return (
     <div className="container-max py-24 relative z-10 min-h-screen">
@@ -127,50 +174,7 @@ export const PracticePortal = () => {
                         exit={{ opacity: 0, scale: 0.95 }}
                         key={problem.id}
                       >
-                        <div className={`p-6 rounded-2xl border transition-all duration-300 ${
-                          isSolved ? 'bg-accent-mint/5 border-accent-mint/30' : 'glass-card hover:border-accent-cyan/30'
-                        }`}>
-                          <div className="flex justify-between items-start mb-4">
-                            <h4 className="text-lg font-bold text-white flex-1 mr-4 group">
-                              <a href={problem.link} target="_blank" rel="noreferrer" className="hover:text-accent-cyan transition-colors inline-flex items-center gap-2">
-                                {problem.title}
-                                <span className="material-symbols-outlined text-[14px] opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all">open_in_new</span>
-                              </a>
-                            </h4>
-                            <button
-                              onClick={() => toggleProblemStatus(problem.id)}
-                              className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 border transition-all ${
-                                isSolved 
-                                  ? 'bg-accent-mint border-accent-mint text-background shadow-[0_0_10px_#00FF88]' 
-                                  : 'bg-surface-container border-border-low-opacity text-transparent hover:border-text-muted'
-                              }`}
-                            >
-                              <span className="material-symbols-outlined text-sm">check</span>
-                            </button>
-                          </div>
-                          
-                          <div className="flex items-center gap-3">
-                            <span className={`px-2 py-1 rounded text-[10px] font-mono uppercase tracking-wider ${
-                              problem.difficulty === 'Easy' ? 'bg-accent-mint/10 text-accent-mint' :
-                              problem.difficulty === 'Medium' ? 'bg-yellow-400/10 text-yellow-400' :
-                              'bg-error/10 text-error'
-                            }`}>
-                              {problem.difficulty}
-                            </span>
-                            <div className="flex flex-wrap gap-2 flex-1">
-                              {problem.tags.slice(0, 2).map(tag => (
-                                <span key={tag} className="text-xs text-text-muted bg-surface-container-high px-2 py-1 rounded">
-                                  {tag}
-                                </span>
-                              ))}
-                              {problem.tags.length > 2 && (
-                                <span className="text-xs text-text-muted bg-surface-container-high px-2 py-1 rounded">
-                                  +{problem.tags.length - 2}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        </div>
+                        <ProblemCard problem={problem} isSolved={isSolved} toggleProblemStatus={toggleProblemStatus} />
                       </motion.div>
                     );
                   })}

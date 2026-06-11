@@ -4,6 +4,7 @@ const pool = require('../db');
 const { z } = require('zod');
 const validate = require('../middleware/validate');
 const authMiddleware = require('../middleware/auth');
+const requireRole = require('../middleware/rbac');
 
 const getTeamQuerySchema = z.object({
   department: z.string().optional(),
@@ -61,7 +62,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // Create team member profile (Requires Auth)
-router.post('/', authMiddleware, validate({ body: createTeamProfileSchema }), async (req, res) => {
+router.post('/', authMiddleware, requireRole(['admin']), validate({ body: createTeamProfileSchema }), async (req, res) => {
   const { role_title, designation, expertise, social_links, bio, profile_image, department, year_of_study } = req.body;
   const user_id = req.user.id;
 
@@ -74,7 +75,7 @@ router.post('/', authMiddleware, validate({ body: createTeamProfileSchema }), as
 });
 
 // Update team member (Requires Auth)
-router.put('/:id', authMiddleware, validate({ body: updateTeamProfileSchema }), async (req, res) => {
+router.put('/:id', authMiddleware, requireRole(['admin']), validate({ body: updateTeamProfileSchema }), async (req, res) => {
   const { role_title, designation, expertise, social_links, bio, profile_image } = req.body;
 
   const result = await pool.query(
