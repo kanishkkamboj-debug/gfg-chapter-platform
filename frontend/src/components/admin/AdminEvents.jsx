@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import ImageUploader from './ImageUploader';
 
 const AdminEvents = () => {
   const [events, setEvents] = useState([]);
@@ -205,6 +206,12 @@ const AdminEvents = () => {
                     <input required type="datetime-local" className="w-full bg-[#112218] border border-[#1a3324] rounded-xl p-3 text-white" value={formData.end_date} onChange={e => setFormData({...formData, end_date: e.target.value})} />
                   </div>
                 </div>
+
+                <ImageUploader 
+                  label="Event Cover Image" 
+                  value={formData.image_url} 
+                  onChange={(val) => setFormData({...formData, image_url: val})} 
+                />
 
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>

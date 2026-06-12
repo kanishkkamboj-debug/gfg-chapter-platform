@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { exportToCSV } from '../../utils/exportToCSV';
 
 const AdminDutyLeave = () => {
   const [leaves, setLeaves] = useState([]);
@@ -47,6 +48,12 @@ const AdminDutyLeave = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-white">Duty Leave Approvals</h2>
+        <button 
+          onClick={() => exportToCSV(leaves, 'duty_leaves.csv')}
+          className="px-4 py-2 bg-[#00FF88]/10 text-[#00FF88] border border-[#00FF88]/30 rounded-lg text-sm font-bold flex items-center gap-2 hover:bg-[#00FF88]/20 transition-colors"
+        >
+          <span className="material-symbols-outlined text-sm">download</span> Export to CSV
+        </button>
       </div>
 
       <div className="bg-[#0c1610] rounded-3xl border border-[#1a3324] overflow-x-auto custom-scrollbar">

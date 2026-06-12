@@ -13,6 +13,7 @@ const AdminDutyLeave = React.lazy(() => import('../components/admin/AdminDutyLea
 const AdminAnalyticsDashboard = React.lazy(() => import('../components/admin/AdminAnalyticsDashboard'));
 const AdminAnnouncements = React.lazy(() => import('../components/admin/AdminAnnouncements'));
 const AdminCertificates = React.lazy(() => import('../components/admin/AdminCertificates'));
+const ActivityChart = React.lazy(() => import('../components/admin/ActivityChart'));
 import DutyLeavePortal from '../components/dashboard/DutyLeavePortal';
 import CertificatesPortal from '../components/dashboard/CertificatesPortal';
 const MemberEventsPortal = React.lazy(() => import('../components/dashboard/MemberEventsPortal'));
@@ -169,6 +170,29 @@ export const DashboardPage = ({ isAdmin = false }) => {
                     <h4 className="text-[#a3b8cc] text-xs font-mono mb-2 uppercase">Pending Requests</h4>
                     <div className="text-3xl font-bold text-yellow-400 mb-1">14 Leaves</div>
                   </div>
+               </div>
+
+               <div className="grid lg:grid-cols-3 gap-6 mb-8">
+                 <div className="lg:col-span-2">
+                   <ActivityChart />
+                 </div>
+                 <div className="bg-[#0c1610] border border-[#1a3324] rounded-2xl p-6 h-[400px] flex flex-col">
+                   <h3 className="text-lg font-bold text-white mb-6">Insights & System Overview</h3>
+                   <div className="flex-1 space-y-4 overflow-y-auto custom-scrollbar pr-2">
+                     <div className="p-4 bg-[#112218] rounded-xl border border-[#1a3324]">
+                       <h4 className="text-[#00FF88] text-sm font-bold mb-1">Transmission Health</h4>
+                       <p className="text-[#a3b8cc] text-xs">Activity is up 24% compared to last week. Automated systems are functioning normally with 0% dropped packets.</p>
+                     </div>
+                     <div className="p-4 bg-[#112218] rounded-xl border border-[#1a3324]">
+                       <h4 className="text-[#00D4FF] text-sm font-bold mb-1">User Engagement</h4>
+                       <p className="text-[#a3b8cc] text-xs">Peak active users hit 65 today. Engagement in the coding resources module increased significantly.</p>
+                     </div>
+                     <div className="p-4 bg-[#112218] rounded-xl border border-[#1a3324]">
+                       <h4 className="text-yellow-400 text-sm font-bold mb-1">Action Required</h4>
+                       <p className="text-[#a3b8cc] text-xs">There are 14 pending duty leave requests waiting for administrative approval.</p>
+                     </div>
+                   </div>
+                 </div>
                </div>
              </motion.div>
           )}

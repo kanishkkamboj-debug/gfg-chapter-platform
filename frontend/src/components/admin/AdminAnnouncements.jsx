@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import ImageUploader from './ImageUploader';
 
 const AdminAnnouncements = () => {
   const [announcements, setAnnouncements] = useState([]);
@@ -9,7 +10,7 @@ const AdminAnnouncements = () => {
   const [isCreating, setIsCreating] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({
-    title: '', description: '', content: '', category: 'General', priority: 'low', is_pinned: false
+    title: '', description: '', content: '', category: 'General', priority: 'low', is_pinned: false, image_url: ''
   });
 
   const fetchAnnouncements = async () => {
@@ -50,7 +51,7 @@ const AdminAnnouncements = () => {
       setIsCreating(false);
       setEditingId(null);
       setFormData({
-        title: '', description: '', content: '', category: 'General', priority: 'low', is_pinned: false
+        title: '', description: '', content: '', category: 'General', priority: 'low', is_pinned: false, image_url: ''
       });
       fetchAnnouncements();
     } catch (err) {
@@ -66,7 +67,8 @@ const AdminAnnouncements = () => {
       content: ann.content || '',
       category: ann.category || 'General',
       priority: ann.priority || 'low',
-      is_pinned: ann.is_pinned || false
+      is_pinned: ann.is_pinned || false,
+      image_url: ann.image_url || ''
     });
     setIsCreating(true);
   };
@@ -94,7 +96,7 @@ const AdminAnnouncements = () => {
         <button 
           onClick={() => {
             setEditingId(null);
-            setFormData({ title: '', description: '', content: '', category: 'General', priority: 'low', is_pinned: false });
+            setFormData({ title: '', description: '', content: '', category: 'General', priority: 'low', is_pinned: false, image_url: '' });
             setIsCreating(true);
           }}
           className="px-6 py-3 bg-[#00FF88] text-[#0a1118] font-bold rounded-xl flex items-center gap-2 hover:shadow-[0_0_20px_rgba(0,255,136,0.4)] transition-all"
@@ -161,6 +163,12 @@ const AdminAnnouncements = () => {
                   <label className="block text-xs font-mono text-[#a3b8cc] mb-1">Description (Short Summary)</label>
                   <textarea required rows="2" className="w-full bg-[#112218] border border-[#1a3324] rounded-xl p-3 text-white" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
                 </div>
+
+                <ImageUploader 
+                  label="Announcement Banner Image (Optional)" 
+                  value={formData.image_url} 
+                  onChange={(val) => setFormData({...formData, image_url: val})} 
+                />
 
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>

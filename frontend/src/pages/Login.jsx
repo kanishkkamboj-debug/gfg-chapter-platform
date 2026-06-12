@@ -24,8 +24,12 @@ export const LoginPage = () => {
     try {
       setLoading(true);
       setError('');
-      await login(email, password);
-      navigate('/dashboard');
+      const loggedInUser = await login(email, password);
+      if (loggedInUser?.user?.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (err) {
       setError(err.message || 'Authentication failed');
     } finally {

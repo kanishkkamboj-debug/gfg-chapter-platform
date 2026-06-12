@@ -48,6 +48,8 @@ app.use(cors({
 
 app.use(cookieParser());
 app.use(express.json());
+const path = require('path');
+app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
 
 // Routes
 app.use('/api/auth', require('./routes/auth'));
@@ -62,6 +64,7 @@ app.use('/api/duty-leaves', require('./routes/duty-leaves'));
 app.use('/api/certificates', require('./routes/certificates'));
 app.use('/api/analytics', require('./routes/analytics'));
 app.use('/api/users', authMiddleware, require('./routes/users'));
+app.use('/api/upload', require('./routes/upload'));
 
 // WebSocket for live updates
 const liveSubscriptions = new Map();

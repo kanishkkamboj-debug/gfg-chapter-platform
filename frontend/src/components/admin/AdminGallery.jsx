@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import ImageUploader from './ImageUploader';
 
 const AdminGallery = () => {
   const [images, setImages] = useState([]);
@@ -91,10 +92,13 @@ const AdminGallery = () => {
                   <label className="text-xs font-mono text-[#a3b8cc] uppercase">Image Title</label>
                   <input type="text" required value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full bg-[#112218] border border-[#1a3324] rounded-xl px-4 py-3 text-white mt-1" />
                 </div>
-                <div>
-                  <label className="text-xs font-mono text-[#a3b8cc] uppercase">Image URL</label>
-                  <input type="url" required value={formData.image_url} onChange={e => setFormData({...formData, image_url: e.target.value})} className="w-full bg-[#112218] border border-[#1a3324] rounded-xl px-4 py-3 text-white mt-1" />
-                </div>
+                
+                <ImageUploader 
+                  label="Gallery Image" 
+                  value={formData.image_url} 
+                  onChange={(val) => setFormData({...formData, image_url: val})} 
+                />
+                
                 <div>
                   <label className="text-xs font-mono text-[#a3b8cc] uppercase">Category</label>
                   <select value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} className="w-full bg-[#112218] border border-[#1a3324] rounded-xl px-4 py-3 text-white mt-1">

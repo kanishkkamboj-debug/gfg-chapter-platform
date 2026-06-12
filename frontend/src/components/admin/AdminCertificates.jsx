@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { exportToCSV } from '../../utils/exportToCSV';
 
 const AdminCertificates = () => {
   const [certificates, setCertificates] = useState([]);
@@ -98,16 +99,24 @@ const AdminCertificates = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center mb-6">
         <h3 className="text-2xl font-bold text-white">Certificate Management</h3>
-        <button 
-          onClick={() => {
+        <div className="flex items-center gap-4">
+          <button 
+            onClick={() => exportToCSV(certificates, 'certificates.csv')}
+            className="px-4 py-3 bg-[#00FF88]/10 text-[#00FF88] border border-[#00FF88]/30 rounded-xl text-sm font-bold flex items-center gap-2 hover:bg-[#00FF88]/20 transition-colors"
+          >
+            <span className="material-symbols-outlined text-sm">download</span> Export to CSV
+          </button>
+          <button 
+            onClick={() => {
             setEditingId(null);
             setFormData({ user_id: '', event_id: '', certificate_type: 'participation', certificate_url: '' });
             setIsCreating(true);
           }}
           className="px-6 py-3 bg-[#00FF88] text-[#0a1118] font-bold rounded-xl flex items-center gap-2 hover:shadow-[0_0_20px_rgba(0,255,136,0.4)] transition-all"
         >
-          <span className="material-symbols-outlined">workspace_premium</span> Issue Certificate
-        </button>
+            <span className="material-symbols-outlined">workspace_premium</span> Issue Certificate
+          </button>
+        </div>
       </div>
 
       {error && (
