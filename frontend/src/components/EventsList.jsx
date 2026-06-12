@@ -16,9 +16,11 @@ export const EventsList = () => {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      fetchEvents(page, eventType, search).then(data => {
-        setTotalPages(data?.pagination?.pages || 1);
-      });
+      fetchEvents(page, eventType, search)
+        .then(data => {
+          setTotalPages(data?.pagination?.pages || 1);
+        })
+        .catch(err => console.error('Error fetching events:', err));
     }, 300);
 
     return () => clearTimeout(timer);

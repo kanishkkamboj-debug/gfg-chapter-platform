@@ -17,14 +17,14 @@ const AdminCertificates = () => {
   const fetchData = async () => {
     try {
       const usersRes = await fetch('/api/users', { credentials: 'include' });
+      if (!usersRes.ok) throw new Error('Failed to fetch users');
       const usersData = await usersRes.json();
       setUsers(usersData.data || []);
       
       const certsRes = await fetch('/api/certificates/admin', { credentials: 'include' });
-      if (certsRes.ok) {
-        const certsData = await certsRes.json();
-        setCertificates(certsData.data || []);
-      }
+      if (!certsRes.ok) throw new Error('Failed to fetch certificates');
+      const certsData = await certsRes.json();
+      setCertificates(certsData.data || []);
     } catch (err) {
       setError(err.message);
     } finally {

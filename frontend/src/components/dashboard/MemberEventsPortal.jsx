@@ -7,6 +7,7 @@ const MemberEventsPortal = () => {
   const fetchEvents = async () => {
     try {
       const res = await fetch('/api/events');
+      if (!res.ok) throw new Error('API Error');
       const data = await res.json();
       setEvents(data.data || []);
     } catch (err) {

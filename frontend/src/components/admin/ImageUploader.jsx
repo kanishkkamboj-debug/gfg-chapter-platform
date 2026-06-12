@@ -42,7 +42,8 @@ const ImageUploader = ({ value, onChange, label = 'Image' }) => {
       // data.url will be like '/uploads/12345.jpg'
       // We need to prepend backend URL or just use relative if proxy handles it.
       // Since Vite proxies /api, but static files are in /uploads on port 5000:
-      const fullUrl = `http://localhost:5000${data.url}`;
+      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const fullUrl = `${baseUrl}${data.url}`;
       onChange(fullUrl);
       
     } catch (err) {

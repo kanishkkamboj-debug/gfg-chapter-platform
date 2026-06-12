@@ -12,6 +12,7 @@ const DutyLeavePortal = () => {
   const fetchLeaves = async () => {
     try {
       const res = await fetch('/api/duty-leaves', { credentials: 'include' });
+      if (!res.ok) throw new Error('API Error');
       const data = await res.json();
       setLeaves(data.data || []);
     } catch (err) {

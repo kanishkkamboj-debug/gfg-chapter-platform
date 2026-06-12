@@ -24,6 +24,7 @@ export const DashboardPage = ({ isAdmin = false }) => {
   const { user } = useApp();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [adminStats, setAdminStats] = useState(null);
+  const [statsError, setStatsError] = useState(false);
 
   useEffect(() => {
     if (isAdmin && activeTab === 'dashboard') {
@@ -33,9 +34,13 @@ export const DashboardPage = ({ isAdmin = false }) => {
           if (res.ok) {
             const data = await res.json();
             setAdminStats(data);
+            setStatsError(false);
+          } else {
+            setStatsError(true);
           }
         } catch (err) {
           console.error("Failed to fetch admin stats:", err);
+          setStatsError(true);
         }
       };
       fetchStats();
@@ -175,6 +180,11 @@ export const DashboardPage = ({ isAdmin = false }) => {
           {/* ADMIN PORTAL SPECIFIC TABS */}
           {isAdmin && activeTab === 'dashboard' && (
              <motion.div key="admin-dash" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+               {statsError && (
+                 <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 text-red-500 rounded-2xl">
+                   Failed to load overview statistics. The database might be offline.
+                 </div>
+               )}
                <div className="grid md:grid-cols-3 gap-6 mb-8">
                   <div className="bg-[#0c1610] p-6 rounded-2xl border border-[#1a3324]">
                     <h4 className="text-[#a3b8cc] text-xs font-mono mb-2 uppercase">Overview Statistics</h4>

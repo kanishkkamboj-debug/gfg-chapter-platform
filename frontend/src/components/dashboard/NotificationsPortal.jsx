@@ -7,6 +7,7 @@ const NotificationsPortal = () => {
   const fetchAnnouncements = async () => {
     try {
       const res = await fetch('/api/announcements');
+      if (!res.ok) throw new Error('API Error');
       const data = await res.json();
       setAnnouncements(data.data || []);
     } catch (err) {

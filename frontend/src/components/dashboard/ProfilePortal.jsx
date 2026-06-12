@@ -21,18 +21,17 @@ const ProfilePortal = () => {
     const fetchProfile = async () => {
       try {
         const res = await fetch('/api/users/me', { credentials: 'include' });
-        if (res.ok) {
-          const data = await res.json();
-          setFormData({
-            full_name: data.full_name || '',
-            bio: data.bio || '',
-            avatar_url: data.avatar_url || '',
-            designation: data.designation || '',
-            skills: data.skills || [],
-            social_links: data.social_links || { github: '', linkedin: '', twitter: '' },
-            profile_privacy: data.profile_privacy || 'public'
-          });
-        }
+        if (!res.ok) throw new Error('API Error');
+        const data = await res.json();
+        setFormData({
+          full_name: data.full_name || '',
+          bio: data.bio || '',
+          avatar_url: data.avatar_url || '',
+          designation: data.designation || '',
+          skills: data.skills || [],
+          social_links: data.social_links || { github: '', linkedin: '', twitter: '' },
+          profile_privacy: data.profile_privacy || 'public'
+        });
       } catch (err) {
         console.error(err);
       } finally {

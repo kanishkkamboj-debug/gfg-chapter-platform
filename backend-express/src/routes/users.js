@@ -17,13 +17,18 @@ const updateUserSchema = z.object({
 
 // Get current user profile
 router.get('/me', async (req, res) => {
-  const result = await pool.query('SELECT id, email, username, full_name, role, avatar_url, bio, joined_at, designation, skills, social_links, achievements, profile_privacy FROM users WHERE id = $1', [req.user.id]);
+  try {
+    const result = await pool.query('SELECT id, email, username, full_name, role, avatar_url, bio, joined_at, designation, skills, social_links, achievements, profile_privacy FROM users WHERE id = $1', [req.user.id]);
 
-  if (result.rows.length === 0) {
-    return res.status(404).json({ error: 'User not found' });
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error('Error fetching user profile:', err);
+    res.status(500).json({ error: 'Failed to fetch user profile' });
   }
-
-  res.json(result.rows[0]);
 });
 
 // Get public profile by username
@@ -79,29 +84,39 @@ router.put('/me', validate({ body: updateUserSchema }), async (req, res) => {
 
 // Get all users
 router.get('/', authMiddleware, requireRole(['admin']), async (req, res) => {
-  const result = await pool.query('SELECT id, email, username, full_name, role, auth_provider, joined_at FROM users ORDER BY joined_at DESC');
-  res.json({ data: result.rows });
+  try {
+    const result = await pool.query('SELECT id, email, username, full_name, role, auth_provider, joined_at FROM users ORDER BY joined_at DESC');
+    res.json({ data: result.rows });
+  } catch (err) {
+    console.error('Error fetching all users:', err);
+    res.status(500).json({ error: 'Failed to fetch users' });
+  }
 });
 
 // Update user role
 const roleSchema = z.object({ role: z.enum(['admin', 'faculty', 'coordinator', 'member']) });
 router.put('/:id/role', authMiddleware, requireRole(['admin']), validate({ body: roleSchema }), async (req, res) => {
-  const { role } = req.body;
-  const targetId = parseInt(req.params.id);
+  try {
+    const { role } = req.body;
+    const targetId = parseInt(req.params.id);
 
-  if (role !== 'admin') {
-    const targetUserRes = await pool.query("SELECT role FROM users WHERE id = $1", [targetId]);
-    if (targetUserRes.rows.length > 0 && targetUserRes.rows[0].role === 'admin') {
-      const adminCountRes = await pool.query("SELECT COUNT(*) FROM users WHERE role = 'admin'");
-      if (parseInt(adminCountRes.rows[0].count) <= 1) {
-        return res.status(400).json({ error: 'Cannot demote the last remaining admin' });
+    if (role !== 'admin') {
+      const targetUserRes = await pool.query("SELECT role FROM users WHERE id = $1", [targetId]);
+      if (targetUserRes.rows.length > 0 && targetUserRes.rows[0].role === 'admin') {
+        const adminCountRes = await pool.query("SELECT COUNT(*) FROM users WHERE role = 'admin'");
+        if (parseInt(adminCountRes.rows[0].count) <= 1) {
+          return res.status(400).json({ error: 'Cannot demote the last remaining admin' });
+        }
       }
     }
-  }
 
-  const result = await pool.query('UPDATE users SET role = $1 WHERE id = $2 RETURNING id, email, username, full_name, role', [role, targetId]);
-  if (result.rows.length === 0) return res.status(404).json({ error: 'User not found' });
-  res.json(result.rows[0]);
+    const result = await pool.query('UPDATE users SET role = $1 WHERE id = $2 RETURNING id, email, username, full_name, role', [role, targetId]);
+    if (result.rows.length === 0) return res.status(404).json({ error: 'User not found' });
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error('Error updating user role:', err);
+    res.status(500).json({ error: 'Failed to update user role' });
+  }
 });
 
 // Delete user
@@ -120,6 +135,7 @@ router.delete('/:id', authMiddleware, requireRole(['admin']), async (req, res) =
     if (result.rows.length === 0) return res.status(404).json({ error: 'User not found' });
     res.json({ success: true });
   } catch (err) {
+    console.error('Error deleting user:', err);
     res.status(400).json({ error: 'Cannot delete user (likely due to existing records like event registrations)' });
   }
 });

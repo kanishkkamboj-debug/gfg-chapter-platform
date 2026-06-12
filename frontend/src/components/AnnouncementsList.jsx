@@ -14,9 +14,11 @@ export const AnnouncementsList = () => {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      fetchAnnouncements(page, category, search).then(data => {
-        setTotalPages(data?.pagination?.pages || 1);
-      });
+      fetchAnnouncements(page, category, search)
+        .then(data => {
+          setTotalPages(data?.pagination?.pages || 1);
+        })
+        .catch(err => console.error('Error fetching announcements:', err));
     }, 300);
 
     return () => clearTimeout(timer);

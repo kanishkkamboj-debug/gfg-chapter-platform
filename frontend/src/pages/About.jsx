@@ -4,6 +4,14 @@ import TiltCard from '../components/TiltCard';
 import { motion } from 'framer-motion';
 
 export const AboutPage = () => {
+  const [stats, setStats] = React.useState({ active_members: '500+', total_events: '24+' });
+  React.useEffect(() => {
+    fetch('/api/analytics/public')
+      .then(res => res.ok ? res.json() : null)
+      .then(data => { if (data) setStats(data); })
+      .catch(console.error);
+  }, []);
+
   return (
     <div className="container-max py-24 min-h-screen relative z-10">
       {/* Header */}
@@ -47,11 +55,11 @@ export const AboutPage = () => {
             
             <div className="grid grid-cols-2 gap-4">
                <div className="bg-surface-container p-4 rounded-2xl border border-border-low-opacity">
-                 <div className="text-2xl font-bold text-white mb-1">500+</div>
+                 <div className="text-2xl font-bold text-white mb-1">{stats.active_members}{typeof stats.active_members === 'number' ? '+' : ''}</div>
                  <div className="text-xs text-text-muted font-mono uppercase">Active Members</div>
                </div>
                <div className="bg-surface-container p-4 rounded-2xl border border-border-low-opacity">
-                 <div className="text-2xl font-bold text-white mb-1">24+</div>
+                 <div className="text-2xl font-bold text-white mb-1">{stats.total_events}{typeof stats.total_events === 'number' ? '+' : ''}</div>
                  <div className="text-xs text-text-muted font-mono uppercase">Events Hosted</div>
                </div>
             </div>

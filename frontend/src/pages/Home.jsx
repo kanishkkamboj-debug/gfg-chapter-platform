@@ -4,6 +4,14 @@ import { Link } from 'react-router-dom';
 import ScrollReveal from '../components/ScrollReveal';
 
 export const HomePage = () => {
+  const [stats, setStats] = React.useState({ active_members: '500+' });
+  React.useEffect(() => {
+    fetch('/api/analytics/public')
+      .then(res => res.ok ? res.json() : null)
+      .then(data => { if (data) setStats(data); })
+      .catch(console.error);
+  }, []);
+
   return (
     <div className="relative font-body">
       {/* Hero Section */}
@@ -62,7 +70,7 @@ export const HomePage = () => {
                 ))}
               </div>
               <div className="text-sm font-bold text-[#a3b8cc]">
-                <span className="text-[#00FF88]">500+</span> Active Members
+                <span className="text-[#00FF88]">{stats.active_members}{typeof stats.active_members === 'number' ? '+' : ''}</span> Active Members
               </div>
             </motion.div>
           </div>
@@ -202,13 +210,15 @@ export const HomePage = () => {
 
 const RecentAnnouncements = () => {
   const [announcements, setAnnouncements] = React.useState([]);
+  const [error, setError] = React.useState(false);
   React.useEffect(() => {
     fetch('/api/search/announcements?q=')
-      .then(res => res.json())
+      .then(res => { if(!res.ok) throw new Error('API failed'); return res.json(); })
       .then(data => setAnnouncements(data.slice(0, 3)))
-      .catch(() => {});
+      .catch((err) => { console.error(err); setError(true); });
   }, []);
 
+  if (error) return <div className="text-red-400 text-sm">Failed to retrieve transmissions.</div>;
   if (announcements.length === 0) return <div className="text-[#a3b8cc] text-sm">No recent transmissions intercepted.</div>;
 
   return (
@@ -228,13 +238,15 @@ const RecentAnnouncements = () => {
 
 const UpcomingEvents = () => {
   const [events, setEvents] = React.useState([]);
+  const [error, setError] = React.useState(false);
   React.useEffect(() => {
     fetch('/api/search/events?q=')
-      .then(res => res.json())
+      .then(res => { if(!res.ok) throw new Error('API failed'); return res.json(); })
       .then(data => setEvents(data.slice(0, 3)))
-      .catch(() => {});
+      .catch((err) => { console.error(err); setError(true); });
   }, []);
 
+  if (error) return <div className="text-red-400 text-sm">Failed to retrieve objectives.</div>;
   if (events.length === 0) return <div className="text-[#a3b8cc] text-sm">No upcoming objectives scheduled.</div>;
 
   return (

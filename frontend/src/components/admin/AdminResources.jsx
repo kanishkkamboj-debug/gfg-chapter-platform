@@ -18,11 +18,7 @@ const AdminResources = () => {
       setResources(data.data || []);
     } catch (err) {
       console.error(err);
-      // Fallback data for UI demonstration if backend route is not ready
-      setResources([
-        { id: 1, title: 'Complete DSA Sheet', category: 'DSA', views: 140, created_at: new Date() },
-        { id: 2, title: 'React Performance Guide', category: 'Development', views: 85, created_at: new Date() }
-      ]);
+      setError('Failed to load resources. Please try again later.');
     } finally {
       setLoading(false);
     }

@@ -21,21 +21,26 @@ const createHofSchema = z.object({
 
 // Get all hall of fame entries
 router.get('/', validate({ query: getHofSchema }), async (req, res) => {
-  const { page, limit } = req.query;
-  const offset = (page - 1) * limit;
+  try {
+    const { page, limit } = req.query;
+    const offset = (page - 1) * limit;
 
-  const result = await pool.query(
-    'SELECT h.*, u.username, u.full_name, u.avatar_url FROM hall_of_fame h JOIN users u ON h.user_id = u.id ORDER BY h.created_at DESC LIMIT $1 OFFSET $2',
-    [limit, offset]
-  );
-  
-  const countResult = await pool.query('SELECT COUNT(*) FROM hall_of_fame');
-  const total = parseInt(countResult.rows[0].count);
+    const result = await pool.query(
+      'SELECT h.*, u.username, u.full_name, u.avatar_url FROM hall_of_fame h JOIN users u ON h.user_id = u.id ORDER BY h.created_at DESC LIMIT $1 OFFSET $2',
+      [limit, offset]
+    );
+    
+    const countResult = await pool.query('SELECT COUNT(*) FROM hall_of_fame');
+    const total = parseInt(countResult.rows[0].count);
 
-  res.json({
-    data: result.rows,
-    pagination: { page, limit, total, pages: Math.ceil(total / limit) }
-  });
+    res.json({
+      data: result.rows,
+      pagination: { page, limit, total, pages: Math.ceil(total / limit) }
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
 // Create entry (Admin only)
@@ -52,21 +57,27 @@ router.post('/', authMiddleware, requireRole(['admin']), validate({ body: create
     res.status(201).json(result.rows[0]);
   } catch (err) {
     if (err.code === '23503') return res.status(400).json({ error: 'User ID does not exist' });
-    throw err;
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
   }
 });
 
 // Delete entry (Admin only)
 router.delete('/:id', authMiddleware, requireRole(['admin']), async (req, res) => {
-  const id = parseInt(req.params.id);
-  if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID format' });
+  try {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID format' });
 
-  const result = await pool.query('DELETE FROM hall_of_fame WHERE id = $1 RETURNING id', [id]);
+    const result = await pool.query('DELETE FROM hall_of_fame WHERE id = $1 RETURNING id', [id]);
 
-  if (result.rows.length === 0) return res.status(404).json({ error: 'Entry not found' });
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Entry not found' });
 
-  global.broadcastUpdate('hall_of_fame', { type: 'delete', id: req.params.id });
-  res.json({ success: true });
+    global.broadcastUpdate('hall_of_fame', { type: 'delete', id: req.params.id });
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
 module.exports = router;

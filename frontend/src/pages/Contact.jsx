@@ -144,8 +144,13 @@ export const ContactPage = () => {
 
               <AnimatePresence>
                 {status === 'success' && (
-                  <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="p-4 bg-accent-mint/20 border border-accent-mint rounded-xl text-accent-mint text-center text-sm font-bold flex items-center justify-center gap-2">
+                  <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="p-4 bg-accent-mint/20 border border-accent-mint rounded-xl text-accent-mint text-center text-sm font-bold flex items-center justify-center gap-2 mt-4">
                     <span className="material-symbols-outlined">check_circle</span> Transmission Successful
+                  </motion.div>
+                )}
+                {status === 'error' && (
+                  <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="p-4 bg-red-500/20 border border-red-500 rounded-xl text-red-400 text-center text-sm font-bold flex items-center justify-center gap-2 mt-4">
+                    <span className="material-symbols-outlined">error</span> Transmission Failed
                   </motion.div>
                 )}
               </AnimatePresence>

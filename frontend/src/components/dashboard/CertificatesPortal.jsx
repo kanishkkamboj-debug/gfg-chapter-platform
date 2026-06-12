@@ -8,6 +8,7 @@ const CertificatesPortal = () => {
   const fetchCertificates = async () => {
     try {
       const res = await fetch('/api/certificates', { credentials: 'include' });
+      if (!res.ok) throw new Error('API Error');
       const data = await res.json();
       setCertificates(data.data || []);
     } catch (err) {

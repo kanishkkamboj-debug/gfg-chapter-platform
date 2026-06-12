@@ -4,6 +4,23 @@ const pool = require('../db');
 const authMiddleware = require('../middleware/auth');
 const requireRole = require('../middleware/rbac');
 
+router.get('/public', async (req, res) => {
+  try {
+    const totalMembers = await pool.query("SELECT COUNT(*) FROM users");
+    const totalEvents = await pool.query("SELECT COUNT(*) FROM events");
+    const activeMembers = await pool.query("SELECT COUNT(*) FROM users WHERE updated_at > NOW() - INTERVAL '30 days'");
+
+    res.json({
+      total_members: parseInt(totalMembers.rows[0].count || 0),
+      total_events: parseInt(totalEvents.rows[0].count || 0),
+      active_members: parseInt(activeMembers.rows[0].count || 0)
+    });
+  } catch (err) {
+    console.error('Public Analytics Error:', err);
+    res.status(500).json({ error: 'Failed to fetch public stats' });
+  }
+});
+
 router.get('/', authMiddleware, requireRole(['admin', 'faculty', 'coordinator']), async (req, res) => {
   try {
     const totalMembers = await pool.query("SELECT COUNT(*) FROM users");

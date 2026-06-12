@@ -33,48 +33,58 @@ const getTicketsQuerySchema = z.object({
 
 // Submit contact form (Public)
 router.post('/', contactLimiter, validate({ body: submitContactSchema }), async (req, res) => {
-  const { name, email, subject, message, category } = req.body;
+  try {
+    const { name, email, subject, message, category } = req.body;
 
-  const result = await pool.query(
-    'INSERT INTO support_tickets (name, email, subject, message, category, status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-    [name, email, subject, message, category || 'general', 'open']
-  );
+    const result = await pool.query(
+      'INSERT INTO support_tickets (name, email, subject, message, category, status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+      [name, email, subject, message, category || 'general', 'open']
+    );
 
-  global.broadcastUpdate('contact', { type: 'new_ticket', data: result.rows[0] });
+    global.broadcastUpdate('contact', { type: 'new_ticket', data: result.rows[0] });
 
-  res.status(201).json({ success: true, ticket_id: result.rows[0].id });
+    res.status(201).json({ success: true, ticket_id: result.rows[0].id });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
 // Get contact/support tickets (admin only)
 router.get('/', authMiddleware, requireRole(['admin']), validate({ query: getTicketsQuerySchema }), async (req, res) => {
-  const { status, page, limit } = req.query;
-  const offset = (page - 1) * limit;
+  try {
+    const { status, page, limit } = req.query;
+    const offset = (page - 1) * limit;
 
-  let query = 'SELECT * FROM support_tickets WHERE 1=1';
-  const params = [];
+    let query = 'SELECT * FROM support_tickets WHERE 1=1';
+    const params = [];
 
-  if (status) {
-    params.push(status);
-    query += ` AND status = $${params.length}`;
-  }
-
-  query += ' ORDER BY created_at DESC LIMIT $' + (params.length + 1) + ' OFFSET $' + (params.length + 2);
-  params.push(limit, offset);
-
-  const result = await pool.query(query, params);
-  
-  const countResult = await pool.query('SELECT COUNT(*) FROM support_tickets');
-  const total = parseInt(countResult.rows[0].count);
-
-  res.json({
-    data: result.rows,
-    pagination: {
-      page,
-      limit,
-      total,
-      pages: Math.ceil(total / limit)
+    if (status) {
+      params.push(status);
+      query += ` AND status = $${params.length}`;
     }
-  });
+
+    query += ' ORDER BY created_at DESC LIMIT $' + (params.length + 1) + ' OFFSET $' + (params.length + 2);
+    params.push(limit, offset);
+
+    const result = await pool.query(query, params);
+    
+    const countResult = await pool.query('SELECT COUNT(*) FROM support_tickets');
+    const total = parseInt(countResult.rows[0].count);
+
+    res.json({
+      data: result.rows,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
 // Reply to a ticket and mark as closed
@@ -83,16 +93,16 @@ const replySchema = z.object({
 });
 
 router.post('/:id/reply', authMiddleware, requireRole(['admin']), validate({ body: replySchema }), async (req, res) => {
-  const { id } = req.params;
-  const { reply_message } = req.body;
-
-  // Get ticket
-  const ticketResult = await pool.query('SELECT * FROM support_tickets WHERE id = $1', [id]);
-  const ticket = ticketResult.rows[0];
-
-  if (!ticket) return res.status(404).json({ error: 'Ticket not found' });
-
   try {
+    const { id } = req.params;
+    const { reply_message } = req.body;
+
+    // Get ticket
+    const ticketResult = await pool.query('SELECT * FROM support_tickets WHERE id = $1', [id]);
+    const ticket = ticketResult.rows[0];
+
+    if (!ticket) return res.status(404).json({ error: 'Ticket not found' });
+
     // Send email
     await transporter.sendMail({
       from: `"GFG Chapter Admin" <${process.env.SMTP_USER || 'admin@gfgchapter.org'}>`,
@@ -108,8 +118,8 @@ router.post('/:id/reply', authMiddleware, requireRole(['admin']), validate({ bod
 
     res.json({ success: true, message: 'Reply sent and ticket closed' });
   } catch (err) {
-    console.error('Email error:', err);
-    res.status(500).json({ error: 'Failed to send email' });
+    console.error('Email/Database error:', err);
+    res.status(500).json({ error: 'Failed to process reply' });
   }
 });
 

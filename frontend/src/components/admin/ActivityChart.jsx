@@ -34,16 +34,15 @@ const ActivityChart = () => {
     const fetchHistoricalData = async () => {
       try {
         const res = await fetch('/api/analytics/historical', { credentials: 'include' });
-        if (res.ok) {
-          const json = await res.json();
-          // Ensure numbers are properly parsed, as PostgreSQL might return strings for COUNT/COALESCE
-          const formattedData = json.map(item => ({
-            name: item.name,
-            users: parseInt(item.users, 10),
-            transmissions: parseInt(item.transmissions, 10)
-          }));
-          setData(formattedData);
-        }
+        if (!res.ok) throw new Error('API Error');
+        const json = await res.json();
+        // Ensure numbers are properly parsed, as PostgreSQL might return strings for COUNT/COALESCE
+        const formattedData = json.map(item => ({
+          name: item.name,
+          users: parseInt(item.users, 10),
+          transmissions: parseInt(item.transmissions, 10)
+        }));
+        setData(formattedData);
       } catch (err) {
         console.error("Failed to fetch historical activity data", err);
       } finally {
