@@ -65,7 +65,7 @@ const AdminGallery = () => {
         {images.map(img => (
           <div key={img.id} className="bg-[#0c1610] rounded-2xl border border-[#1a3324] overflow-hidden group relative">
             <div className="h-40 overflow-hidden relative">
-              <img src={img.image_url} alt={img.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+              <img loading="lazy" src={img.image_url} alt={img.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
               <button onClick={() => handleDelete(img.id)} className="absolute top-2 right-2 p-1.5 bg-red-500/80 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">
                 <span className="material-symbols-outlined text-[16px]">delete</span>
               </button>

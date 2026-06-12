@@ -40,7 +40,7 @@ export const CommunityPage = () => {
                 <span className="px-3 py-1 bg-surface-container rounded-full text-xs font-mono text-text-muted">#project-ideas</span>
               </div>
               
-              <MagneticButton href="#" className="bg-[#5865F2] text-white rounded-xl px-8 py-4 font-bold hover:shadow-[0_0_20px_rgba(88,101,242,0.4)]">
+              <MagneticButton href="#!" aria-label="Launch Discord" className="bg-[#5865F2] text-white rounded-xl px-8 py-4 font-bold hover:shadow-[0_0_20px_rgba(88,101,242,0.4)]">
                 Launch Discord
               </MagneticButton>
             </div>
@@ -67,7 +67,7 @@ export const CommunityPage = () => {
                 ))}
               </div>
               
-              <MagneticButton href="#" className="bg-[#25D366] text-background rounded-xl px-8 py-4 font-bold hover:shadow-[0_0_20px_rgba(37,211,102,0.4)]">
+              <MagneticButton href="#!" aria-label="Browse Circles" className="bg-[#25D366] text-background rounded-xl px-8 py-4 font-bold hover:shadow-[0_0_20px_rgba(37,211,102,0.4)]">
                 Browse Circles
               </MagneticButton>
             </div>
@@ -84,8 +84,8 @@ export const CommunityPage = () => {
                 <h3 className="text-3xl font-bold text-white mb-4">Mentor Pairing System</h3>
                 <p className="text-text-muted mb-6">Stuck on your learning path? Request a 1-on-1 session with our core team members and alumni network.</p>
                 <div className="flex gap-4">
-                  <button className="px-6 py-3 rounded-xl bg-accent-cyan text-background font-bold hover:shadow-neon transition-shadow">Request Mentor</button>
-                  <button className="px-6 py-3 rounded-xl border border-border-low-opacity text-white hover:border-accent-cyan transition-colors">Become a Mentor</button>
+                  <button aria-label="Request Mentor" className="px-6 py-3 rounded-xl bg-accent-cyan text-background font-bold hover:shadow-neon transition-shadow">Request Mentor</button>
+                  <button aria-label="Become a Mentor" className="px-6 py-3 rounded-xl border border-border-low-opacity text-white hover:border-accent-cyan transition-colors">Become a Mentor</button>
                 </div>
               </div>
               <div className="flex -space-x-4">

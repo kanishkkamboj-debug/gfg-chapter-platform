@@ -61,7 +61,10 @@ export const AppProvider = ({ children }) => {
         credentials: 'include',
         body: JSON.stringify({ email, password })
       });
-      if (!response.ok) throw new Error('Login failed');
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error || errData.details?.[0]?.message || 'Login failed');
+      }
       const data = await response.json();
       setUser(data.user);
       setIsAuthenticated(true);
@@ -83,7 +86,10 @@ export const AppProvider = ({ children }) => {
         credentials: 'include',
         body: JSON.stringify({ email, password, username, full_name: fullName, master_key: masterKey })
       });
-      if (!response.ok) throw new Error('Registration failed');
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error || errData.details?.[0]?.message || 'Registration failed');
+      }
       const data = await response.json();
       setUser(data.user);
       setIsAuthenticated(true);

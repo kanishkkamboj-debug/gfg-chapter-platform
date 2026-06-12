@@ -8,9 +8,7 @@ const validate = require('../middleware/validate');
 const { authLimiter } = require('../middleware/rateLimiter');
 
 const registerSchema = z.object({
-  email: z.string().email().refine(val => val.endsWith('@college.edu') || val === 'admin@gfg.com', {
-    message: "Registration restricted to @college.edu domain"
-  }),
+  email: z.string().email(),
   password: z.string().min(6),
   username: z.string().min(3),
   full_name: z.string().min(1),
@@ -24,78 +22,94 @@ const loginSchema = z.object({
 
 // Register
 router.post('/register', authLimiter, validate({ body: registerSchema }), async (req, res) => {
-  const { email, password, username, full_name, master_key } = req.body;
-  
-  const hashedPassword = await bcrypt.hash(password, 10);
-  
-  let role = 'member';
-  if (master_key && process.env.ADMIN_MASTER_KEY && master_key === process.env.ADMIN_MASTER_KEY) {
-    role = 'admin';
+  try {
+    const { email, password, username, full_name, master_key } = req.body;
+    
+    const hashedPassword = await bcrypt.hash(password, 10);
+    
+    let role = 'member';
+    if (master_key && process.env.ADMIN_MASTER_KEY && master_key === process.env.ADMIN_MASTER_KEY) {
+      role = 'admin';
+    }
+    
+    // Check if user already exists
+    const existing = await pool.query('SELECT id FROM users WHERE email = $1 OR username = $2', [email, username]);
+    if (existing.rows.length > 0) {
+      return res.status(400).json({ error: 'User with this email or username already exists' });
+    }
+
+    const result = await pool.query(
+      'INSERT INTO users (email, password_hash, username, full_name, role) VALUES ($1, $2, $3, $4, $5) RETURNING id, email, username, full_name, role',
+      [email, hashedPassword, username, full_name, role]
+    );
+
+    const token = jwt.sign(
+      { id: result.rows[0].id, email: result.rows[0].email, role: result.rows[0].role },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000
+    });
+
+    res.status(201).json({
+      user: result.rows[0]
+    });
+  } catch (error) {
+    console.error('Registration error:', error);
+    res.status(500).json({ error: `Internal server error during registration: ${error.message}` });
   }
-  
-  const result = await pool.query(
-    'INSERT INTO users (email, password_hash, username, full_name, role) VALUES ($1, $2, $3, $4, $5) RETURNING id, email, username, full_name, role',
-    [email, hashedPassword, username, full_name, role]
-  );
-
-  const token = jwt.sign(
-    { id: result.rows[0].id, email: result.rows[0].email, role: result.rows[0].role },
-    process.env.JWT_SECRET,
-    { expiresIn: '7d' }
-  );
-
-  res.cookie('token', token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    maxAge: 7 * 24 * 60 * 60 * 1000
-  });
-
-  res.status(201).json({
-    user: result.rows[0]
-  });
 });
 
 // Login
 router.post('/login', authLimiter, validate({ body: loginSchema }), async (req, res) => {
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-  const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+    const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
 
-  if (result.rows.length === 0) {
-    return res.status(401).json({ error: 'Invalid credentials' });
-  }
-
-  const user = result.rows[0];
-  const validPassword = await bcrypt.compare(password, user.password_hash);
-
-  if (!validPassword) {
-    return res.status(401).json({ error: 'Invalid credentials' });
-  }
-
-  const token = jwt.sign(
-    { id: user.id, email: user.email, role: user.role },
-    process.env.JWT_SECRET,
-    { expiresIn: '7d' }
-  );
-
-  res.cookie('token', token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    maxAge: 7 * 24 * 60 * 60 * 1000
-  });
-
-  res.json({
-    user: {
-      id: user.id,
-      email: user.email,
-      username: user.username,
-      full_name: user.full_name,
-      role: user.role,
-      avatar_url: user.avatar_url
+    if (result.rows.length === 0) {
+      return res.status(401).json({ error: 'Invalid credentials' });
     }
-  });
+
+    const user = result.rows[0];
+    const validPassword = await bcrypt.compare(password, user.password_hash);
+
+    if (!validPassword) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    const token = jwt.sign(
+      { id: user.id, email: user.email, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000
+    });
+
+    res.json({
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        full_name: user.full_name,
+        role: user.role,
+        avatar_url: user.avatar_url
+      }
+    });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ error: 'Internal server error during login' });
+  }
 });
 
 // Verify token

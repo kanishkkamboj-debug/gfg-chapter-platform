@@ -72,7 +72,7 @@ const AdminResources = () => {
 
       {error && <div className="p-4 bg-red-500/10 border border-red-500/30 text-red-500 rounded-xl">{error}</div>}
 
-      <div className="bg-[#0c1610] rounded-3xl border border-[#1a3324] overflow-hidden">
+      <div className="bg-[#0c1610] rounded-3xl border border-[#1a3324] overflow-x-auto custom-scrollbar">
         <table className="w-full text-left text-sm">
           <thead className="bg-[#112218] text-[#a3b8cc] uppercase text-xs font-mono">
             <tr>

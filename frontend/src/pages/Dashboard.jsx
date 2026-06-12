@@ -13,6 +13,9 @@ const AdminDutyLeave = React.lazy(() => import('../components/admin/AdminDutyLea
 const AdminAnalyticsDashboard = React.lazy(() => import('../components/admin/AdminAnalyticsDashboard'));
 import DutyLeavePortal from '../components/dashboard/DutyLeavePortal';
 import CertificatesPortal from '../components/dashboard/CertificatesPortal';
+const MemberEventsPortal = React.lazy(() => import('../components/dashboard/MemberEventsPortal'));
+const ProfilePortal = React.lazy(() => import('../components/dashboard/ProfilePortal'));
+const NotificationsPortal = React.lazy(() => import('../components/dashboard/NotificationsPortal'));
 
 export const DashboardPage = ({ isAdmin = false }) => {
   const { user } = useApp();
@@ -95,48 +98,55 @@ export const DashboardPage = ({ isAdmin = false }) => {
                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                   <TiltCard className="p-6 rounded-2xl border border-[#1a3324] bg-[#0c1610]">
                     <h4 className="text-[#a3b8cc] text-xs font-mono mb-2 uppercase">Total Events Registered</h4>
-                    <div className="text-3xl font-bold text-white mb-1">12</div>
+                    <div className="text-3xl font-bold text-white mb-1">Live data loading</div>
                   </TiltCard>
                   <TiltCard className="p-6 rounded-2xl border border-[#1a3324] bg-[#0c1610]">
                     <h4 className="text-[#a3b8cc] text-xs font-mono mb-2 uppercase">Upcoming Events</h4>
-                    <div className="text-3xl font-bold text-[#00FF88] mb-1">2</div>
+                    <div className="text-3xl font-bold text-[#00FF88] mb-1">Syncing...</div>
                   </TiltCard>
                   <TiltCard className="p-6 rounded-2xl border border-[#1a3324] bg-[#0c1610]">
                     <h4 className="text-[#a3b8cc] text-xs font-mono mb-2 uppercase">Certificates Count</h4>
-                    <div className="text-3xl font-bold text-[#00D4FF] mb-1">4</div>
+                    <div className="text-3xl font-bold text-[#00D4FF] mb-1">Check tab</div>
                   </TiltCard>
                   <TiltCard className="p-6 rounded-2xl border border-[#1a3324] bg-[#0c1610]">
                     <h4 className="text-[#a3b8cc] text-xs font-mono mb-2 uppercase">Recent Announcements</h4>
-                    <div className="text-3xl font-bold text-purple-400 mb-1">3</div>
+                    <div className="text-3xl font-bold text-purple-400 mb-1">New</div>
                   </TiltCard>
+               </div>
+               <div className="p-6 rounded-2xl border border-[#1a3324] bg-[#0c1610]">
+                  <h3 className="text-xl font-bold text-white mb-2">Welcome to your connected dashboard!</h3>
+                  <p className="text-[#a3b8cc]">Navigate using the sidebar to view live events, manage your profile, and request duty leaves.</p>
                </div>
              </motion.div>
           )}
 
           {!isAdmin && activeTab === 'duty-leave' && (
-             <motion.div key="mem-dl" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-6">
-                   <div className="bg-[#0c1610] p-8 rounded-3xl border border-[#1a3324]">
-                      <h3 className="text-xl font-bold text-white mb-4">Ordinary Duty Leave</h3>
-                      <p className="text-[#a3b8cc] text-sm mb-6">Apply for DL for standard event participation.</p>
-                      <button onClick={() => alert('Application submitted')} className="w-full py-3 bg-[#00FF88] text-[#0a1118] font-bold rounded-xl mb-4 hover:shadow-[0_0_15px_rgba(0,255,136,0.5)] transition-all hover:-translate-y-1">Apply Now</button>
-                      <button onClick={() => alert('No active applications')} className="w-full py-3 border border-[#1a3324] text-white font-bold rounded-xl mb-4 hover:bg-[#112218] transition-colors">View Status</button>
-                      <button onClick={() => alert('No letters available')} className="w-full py-3 text-xs font-mono text-[#00FF88] hover:text-white transition-colors flex items-center justify-center gap-2"><span className="material-symbols-outlined text-[16px]">download</span> Download Approved Letter</button>
-                   </div>
-                   <div className="bg-[#0c1610] p-8 rounded-3xl border border-[#1a3324]">
-                      <h3 className="text-xl font-bold text-white mb-4">Special Duty Leave</h3>
-                      <p className="text-[#a3b8cc] text-sm mb-6">Apply for out-station hackathons and major representations.</p>
-                      <button onClick={() => alert('Special Application submitted')} className="w-full py-3 bg-[#00D4FF] text-[#0a1118] font-bold rounded-xl mb-4 hover:shadow-[0_0_15px_rgba(0,212,255,0.5)] transition-all hover:-translate-y-1">Apply Now</button>
-                      <button onClick={() => alert('No active applications')} className="w-full py-3 border border-[#1a3324] text-white font-bold rounded-xl mb-4 hover:bg-[#112218] transition-colors">View Status</button>
-                      <button onClick={() => alert('No letters available')} className="w-full py-3 text-xs font-mono text-[#00D4FF] hover:text-white transition-colors flex items-center justify-center gap-2"><span className="material-symbols-outlined text-[16px]">download</span> Download Approved Letter</button>
-                   </div>
-                </div>
-                <div className="bg-[#112218] p-6 rounded-2xl border border-[#1a3324] flex items-center justify-between text-sm">
-                   <div className="flex items-center gap-4 text-[#a3b8cc] font-mono">
-                      <span className="text-[#00FF88]">Student</span> → <span className="text-white">Coordinator</span> → <span className="text-white">Faculty</span> → <span className="text-[#00D4FF]">Approved</span>
-                   </div>
-                   <span className="text-[#a3b8cc] uppercase text-xs font-bold">Workflow Status Tracker</span>
-                </div>
+             <motion.div key="mem-dl" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+                <DutyLeavePortal />
+             </motion.div>
+          )}
+
+          {!isAdmin && activeTab === 'certificates' && (
+             <motion.div key="mem-cert" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+                <CertificatesPortal />
+             </motion.div>
+          )}
+
+          {!isAdmin && activeTab === 'events' && (
+             <motion.div key="mem-events" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+                <MemberEventsPortal />
+             </motion.div>
+          )}
+
+          {!isAdmin && activeTab === 'profile' && (
+             <motion.div key="mem-profile" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+                <ProfilePortal />
+             </motion.div>
+          )}
+
+          {!isAdmin && activeTab === 'notifications' && (
+             <motion.div key="mem-notifications" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+                <NotificationsPortal />
              </motion.div>
           )}
 
@@ -209,7 +219,7 @@ export const DashboardPage = ({ isAdmin = false }) => {
           )}
 
           {/* Fallback for other tabs */}
-          {activeTab !== 'dashboard' && activeTab !== 'duty-leave' && activeTab !== 'certificates' && activeTab !== 'analytics' && activeTab !== 'duty-leave-mgmt' && activeTab !== 'transmissions' && activeTab !== 'events-mgmt' && activeTab !== 'users' && activeTab !== 'resources' && activeTab !== 'hall-of-fame' && activeTab !== 'gallery' && (
+          {activeTab !== 'dashboard' && activeTab !== 'duty-leave' && activeTab !== 'certificates' && activeTab !== 'events' && activeTab !== 'profile' && activeTab !== 'notifications' && activeTab !== 'analytics' && activeTab !== 'duty-leave-mgmt' && activeTab !== 'transmissions' && activeTab !== 'events-mgmt' && activeTab !== 'users' && activeTab !== 'resources' && activeTab !== 'hall-of-fame' && activeTab !== 'gallery' && (
              <motion.div key="fallback" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="bg-[#0c1610] p-12 rounded-3xl border border-[#1a3324] text-center">
                 <span className="material-symbols-outlined text-4xl text-[#1a3324] mb-4">construction</span>
                 <h3 className="text-xl font-bold text-white mb-2">Module Provisioned</h3>

@@ -75,8 +75,8 @@ export const TeamPage = () => {
                   </div>
 
                   <div className="flex justify-center md:justify-start gap-3">
-                     <a href="#" className="w-10 h-10 rounded-full bg-surface flex items-center justify-center text-text-muted hover:text-white border border-border-low-opacity hover:border-yellow-400 transition-colors"><span className="material-symbols-outlined text-[18px]">language</span></a>
-                     <a href="#" className="w-10 h-10 rounded-full bg-surface flex items-center justify-center text-text-muted hover:text-white border border-border-low-opacity hover:border-yellow-400 transition-colors"><span className="material-symbols-outlined text-[18px]">mail</span></a>
+                     <a href="#!" aria-label="Website" className="w-10 h-10 rounded-full bg-surface flex items-center justify-center text-text-muted hover:text-white border border-border-low-opacity hover:border-yellow-400 transition-colors"><span className="material-symbols-outlined text-[18px]">language</span></a>
+                     <a href="mailto:faculty@college.edu" aria-label="Email" className="w-10 h-10 rounded-full bg-surface flex items-center justify-center text-text-muted hover:text-white border border-border-low-opacity hover:border-yellow-400 transition-colors"><span className="material-symbols-outlined text-[18px]">mail</span></a>
                   </div>
                 </div>
              </TiltCard>

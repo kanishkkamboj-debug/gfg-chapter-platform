@@ -16,7 +16,6 @@ if (!process.env.JWT_SECRET) {
 }
 
 const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
 
 const app = express();
 const server = http.createServer(app);
@@ -46,14 +45,7 @@ app.use(cors({
   credentials: true
 }));
 
-const globalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 300, // Limit each IP to 300 requests per window
-  message: { error: 'Too many requests, please try again later.' },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-app.use('/api/', globalLimiter);
+
 app.use(cookieParser());
 app.use(express.json());
 

@@ -188,7 +188,8 @@ export const ContactPage = () => {
                 ].map(social => (
                   <motion.a
                     key={social.name}
-                    href="#"
+                    href="#!"
+                    aria-label={`Visit our ${social.name}`}
                     whileHover={{ y: -5, scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     className="w-14 h-14 rounded-2xl bg-surface-container border border-border-low-opacity flex flex-col items-center justify-center text-text-muted hover:text-white transition-colors relative group"
