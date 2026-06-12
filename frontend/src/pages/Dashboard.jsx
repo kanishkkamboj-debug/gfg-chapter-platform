@@ -3,16 +3,16 @@ import { useApp } from '../context/AppContext';
 import ScrollReveal from '../components/ScrollReveal';
 import TiltCard from '../components/TiltCard';
 import { motion, AnimatePresence } from 'framer-motion';
-import AdminTransmissions from '../components/admin/AdminTransmissions';
-import AdminEvents from '../components/admin/AdminEvents';
-import AdminUsers from '../components/admin/AdminUsers';
-import AdminResources from '../components/admin/AdminResources';
-import AdminHallOfFame from '../components/admin/AdminHallOfFame';
-import AdminGallery from '../components/admin/AdminGallery';
+const AdminTransmissions = React.lazy(() => import('../components/admin/AdminTransmissions'));
+const AdminEvents = React.lazy(() => import('../components/admin/AdminEvents'));
+const AdminUsers = React.lazy(() => import('../components/admin/AdminUsers'));
+const AdminResources = React.lazy(() => import('../components/admin/AdminResources'));
+const AdminHallOfFame = React.lazy(() => import('../components/admin/AdminHallOfFame'));
+const AdminGallery = React.lazy(() => import('../components/admin/AdminGallery'));
+const AdminDutyLeave = React.lazy(() => import('../components/admin/AdminDutyLeave'));
+const AdminAnalyticsDashboard = React.lazy(() => import('../components/admin/AdminAnalyticsDashboard'));
 import DutyLeavePortal from '../components/dashboard/DutyLeavePortal';
 import CertificatesPortal from '../components/dashboard/CertificatesPortal';
-import AdminDutyLeave from '../components/admin/AdminDutyLeave';
-import AdminAnalyticsDashboard from '../components/admin/AdminAnalyticsDashboard';
 
 export const DashboardPage = ({ isAdmin = false }) => {
   const { user } = useApp();
@@ -87,8 +87,8 @@ export const DashboardPage = ({ isAdmin = false }) => {
           </div>
         </ScrollReveal>
 
-        <AnimatePresence mode="wait">
-          
+        <React.Suspense fallback={<div className="p-12 text-center text-[#00FF88] font-mono animate-pulse">Loading module components...</div>}>
+          <AnimatePresence mode="wait">
           {/* MEMBER PORTAL SPECIFIC TABS */}
           {!isAdmin && activeTab === 'dashboard' && (
              <motion.div key="mem-dash" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
@@ -217,7 +217,8 @@ export const DashboardPage = ({ isAdmin = false }) => {
              </motion.div>
           )}
 
-        </AnimatePresence>
+          </AnimatePresence>
+        </React.Suspense>
       </div>
     </div>
   );

@@ -8,7 +8,9 @@ const validate = require('../middleware/validate');
 const { authLimiter } = require('../middleware/rateLimiter');
 
 const registerSchema = z.object({
-  email: z.string().email(),
+  email: z.string().email().refine(val => val.endsWith('@college.edu') || val === 'admin@gfg.com', {
+    message: "Registration restricted to @college.edu domain"
+  }),
   password: z.string().min(6),
   username: z.string().min(3),
   full_name: z.string().min(1),

@@ -111,4 +111,4 @@ const AdminGallery = () => {
   );
 };
 
-export default AdminGallery;
+export default React.memo(AdminGallery);

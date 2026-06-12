@@ -108,43 +108,49 @@ router.post('/', authMiddleware, requireRole(['admin']), validate({ body: create
 
 // Register for event
 router.post('/:id/register', authMiddleware, async (req, res) => {
-  const eventId = parseInt(req.params.id);
-  if (isNaN(eventId)) return res.status(400).json({ error: 'Invalid event ID format' });
-
+  const event_id = parseInt(req.params.id);
+  if (isNaN(event_id)) return res.status(400).json({ error: 'Invalid event ID format' });
   const user_id = req.user.id;
-  const event_id = eventId;
 
-  const existing = await pool.query(
-    'SELECT * FROM event_registrations WHERE event_id = $1 AND user_id = $2',
-    [event_id, user_id]
-  );
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
 
-  if (existing.rows.length > 0) {
-    return res.status(400).json({ error: 'Already registered' });
+    // 1. Lock the event row for update
+    const eventRes = await client.query('SELECT capacity, registered_count FROM events WHERE id = $1 FOR UPDATE', [event_id]);
+    if (eventRes.rows.length === 0) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ error: 'Event not found' });
+    }
+    const event = eventRes.rows[0];
+
+    // 2. Check capacity
+    if (event.capacity !== null && event.registered_count >= event.capacity) {
+      await client.query('ROLLBACK');
+      return res.status(400).json({ error: 'Event is at full capacity' });
+    }
+
+    // 3. Check existing registration
+    const existing = await client.query('SELECT * FROM event_registrations WHERE event_id = $1 AND user_id = $2', [event_id, user_id]);
+    if (existing.rows.length > 0) {
+      await client.query('ROLLBACK');
+      return res.status(400).json({ error: 'Already registered' });
+    }
+
+    // 4. Insert registration & update count
+    await client.query('INSERT INTO event_registrations (event_id, user_id) VALUES ($1, $2)', [event_id, user_id]);
+    await client.query('UPDATE events SET registered_count = registered_count + 1 WHERE id = $1', [event_id]);
+
+    await client.query('COMMIT');
+
+    global.broadcastUpdate('events', { type: 'registration', event_id });
+    res.json({ success: true });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    res.status(500).json({ error: 'Database transaction error' });
+  } finally {
+    client.release();
   }
-
-  await pool.query(
-    'INSERT INTO event_registrations (event_id, user_id) VALUES ($1, $2)',
-    [event_id, user_id]
-  );
-
-  const updated = await pool.query(
-    `UPDATE events 
-     SET registered_count = registered_count + 1 
-     WHERE id = $1 AND (capacity IS NULL OR registered_count < capacity) 
-     RETURNING id`,
-    [event_id]
-  );
-
-  if (updated.rows.length === 0) {
-    // If no row was updated, it's either an invalid event ID or it's at capacity.
-    // We already checked the event ID existence above, so it must be capacity.
-    return res.status(400).json({ error: 'Event is at full capacity' });
-  }
-
-  global.broadcastUpdate('events', { type: 'registration', event_id });
-
-  res.json({ success: true });
 });
 
 // Unregister from event

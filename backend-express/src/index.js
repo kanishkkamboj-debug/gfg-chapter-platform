@@ -15,8 +15,22 @@ if (!process.env.JWT_SECRET) {
   process.exit(1);
 }
 
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+
 const app = express();
 const server = http.createServer(app);
+
+// Security Headers
+app.use(helmet());
+
+// Global Rate Limiting
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 500, // Limit each IP to 500 requests per window
+  message: { error: 'Too many requests from this IP, please try again later.' },
+});
+app.use('/api', globalLimiter);
 const wss = new WebSocket.Server({ server });
 
 // Middleware
@@ -113,7 +127,8 @@ app.use((err, req, res, next) => {
   }
 
   // Fallback 500
-  res.status(500).json({ error: 'Internal server error', message: err.message });
+  const isDev = process.env.NODE_ENV !== 'production';
+  res.status(500).json({ error: 'Internal server error', message: isDev ? err.message : undefined });
 });
 
 const PORT = process.env.PORT || 5000;

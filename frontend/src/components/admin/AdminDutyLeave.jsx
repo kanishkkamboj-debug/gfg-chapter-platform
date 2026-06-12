@@ -99,4 +99,4 @@ const AdminDutyLeave = () => {
   );
 };
 
-export default AdminDutyLeave;
+export default React.memo(AdminDutyLeave);

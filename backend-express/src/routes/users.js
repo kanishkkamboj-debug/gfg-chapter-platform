@@ -47,6 +47,7 @@ router.put('/me', validate({ body: updateUserSchema }), async (req, res) => {
 
 // ADMIN ROUTES
 
+
 // Get all users
 router.get('/', authMiddleware, requireRole(['admin']), async (req, res) => {
   const result = await pool.query('SELECT id, email, username, full_name, role, auth_provider, joined_at FROM users ORDER BY joined_at DESC');
@@ -54,10 +55,22 @@ router.get('/', authMiddleware, requireRole(['admin']), async (req, res) => {
 });
 
 // Update user role
-const roleSchema = z.object({ role: z.enum(['admin', 'member']) });
+const roleSchema = z.object({ role: z.enum(['admin', 'faculty', 'coordinator', 'member']) });
 router.put('/:id/role', authMiddleware, requireRole(['admin']), validate({ body: roleSchema }), async (req, res) => {
   const { role } = req.body;
-  const result = await pool.query('UPDATE users SET role = $1 WHERE id = $2 RETURNING id, email, username, full_name, role', [role, req.params.id]);
+  const targetId = parseInt(req.params.id);
+
+  if (role !== 'admin') {
+    const targetUserRes = await pool.query("SELECT role FROM users WHERE id = $1", [targetId]);
+    if (targetUserRes.rows.length > 0 && targetUserRes.rows[0].role === 'admin') {
+      const adminCountRes = await pool.query("SELECT COUNT(*) FROM users WHERE role = 'admin'");
+      if (parseInt(adminCountRes.rows[0].count) <= 1) {
+        return res.status(400).json({ error: 'Cannot demote the last remaining admin' });
+      }
+    }
+  }
+
+  const result = await pool.query('UPDATE users SET role = $1 WHERE id = $2 RETURNING id, email, username, full_name, role', [role, targetId]);
   if (result.rows.length === 0) return res.status(404).json({ error: 'User not found' });
   res.json(result.rows[0]);
 });
@@ -65,7 +78,16 @@ router.put('/:id/role', authMiddleware, requireRole(['admin']), validate({ body:
 // Delete user
 router.delete('/:id', authMiddleware, requireRole(['admin']), async (req, res) => {
   try {
-    const result = await pool.query('DELETE FROM users WHERE id = $1 RETURNING id', [req.params.id]);
+    const targetId = parseInt(req.params.id);
+    const targetUserRes = await pool.query("SELECT role FROM users WHERE id = $1", [targetId]);
+    if (targetUserRes.rows.length > 0 && targetUserRes.rows[0].role === 'admin') {
+      const adminCountRes = await pool.query("SELECT COUNT(*) FROM users WHERE role = 'admin'");
+      if (parseInt(adminCountRes.rows[0].count) <= 1) {
+        return res.status(400).json({ error: 'Cannot delete the last remaining admin' });
+      }
+    }
+
+    const result = await pool.query('DELETE FROM users WHERE id = $1 RETURNING id', [targetId]);
     if (result.rows.length === 0) return res.status(404).json({ error: 'User not found' });
     res.json({ success: true });
   } catch (err) {

@@ -54,12 +54,28 @@ router.put('/:id/status', authMiddleware, requireRole(['admin', 'faculty', 'coor
 
   if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID format' });
 
+  // Fetch current state
+  const currentLeaveRes = await pool.query('SELECT status FROM duty_leaves WHERE id = $1', [id]);
+  if (currentLeaveRes.rows.length === 0) return res.status(404).json({ error: 'Duty leave not found' });
+  
+  const currentStatus = currentLeaveRes.rows[0].status;
+
+  // Strict State Machine Enforcement
+  if (req.user.role !== 'admin') {
+    if (status === 'coordinator_approved') {
+      if (req.user.role !== 'coordinator') return res.status(403).json({ error: 'Only coordinators can grant coordinator_approved status' });
+      if (currentStatus !== 'pending') return res.status(400).json({ error: 'Can only approve pending leaves' });
+    }
+    if (status === 'faculty_approved') {
+      if (req.user.role !== 'faculty') return res.status(403).json({ error: 'Only faculty can grant faculty_approved status' });
+      if (currentStatus !== 'coordinator_approved') return res.status(400).json({ error: 'Faculty can only approve leaves already approved by coordinator' });
+    }
+  }
+
   const result = await pool.query(
     'UPDATE duty_leaves SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2 RETURNING *',
     [status, id]
   );
-
-  if (result.rows.length === 0) return res.status(404).json({ error: 'Duty leave not found' });
 
   global.broadcastUpdate('duty_leaves', { type: 'update', data: result.rows[0] });
   res.json(result.rows[0]);
