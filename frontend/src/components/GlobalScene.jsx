@@ -3,13 +3,18 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Float } from '@react-three/drei';
 import * as THREE from 'three';
 
+const colorA = new THREE.Color('#00FF88');
+const colorB = new THREE.Color('#00D4FF');
+const tempColor = new THREE.Color();
+
 const NeuralNetwork = () => {
   const linesRef = useRef();
   const particlesRef = useRef();
   const { mouse, viewport } = useThree();
 
-  const particleCount = 150;
+  const particleCount = 100; // Reduced from 150 for better performance
   const maxDistance = 2.5;
+  const maxDistanceSq = maxDistance * maxDistance;
 
   // Generate random positions and velocities
   const [positions, velocities] = useMemo(() => {
@@ -37,6 +42,8 @@ const NeuralNetwork = () => {
   const lineColors = useMemo(() => new Float32Array(maxLines * 6), [maxLines]);
 
   useFrame(() => {
+    if (!particlesRef.current || !linesRef.current) return;
+
     // Parallax effect with mouse
     particlesRef.current.rotation.y = THREE.MathUtils.lerp(particlesRef.current.rotation.y, (mouse.x * Math.PI) / 10, 0.05);
     particlesRef.current.rotation.x = THREE.MathUtils.lerp(particlesRef.current.rotation.x, (mouse.y * Math.PI) / 10, 0.05);
@@ -74,9 +81,7 @@ const NeuralNetwork = () => {
         const dz = positions[i * 3 + 2] - positions[j * 3 + 2];
         const distSq = dx * dx + dy * dy + dz * dz;
 
-        if (distSq < maxDistance * maxDistance) {
-          const alpha = 1.0 - Math.sqrt(distSq) / maxDistance;
-
+        if (distSq < maxDistanceSq) {
           linePositions[lineIdx * 6] = positions[i * 3];
           linePositions[lineIdx * 6 + 1] = positions[i * 3 + 1];
           linePositions[lineIdx * 6 + 2] = positions[i * 3 + 2];
@@ -84,19 +89,17 @@ const NeuralNetwork = () => {
           linePositions[lineIdx * 6 + 4] = positions[j * 3 + 1];
           linePositions[lineIdx * 6 + 5] = positions[j * 3 + 2];
 
-          // Greenish-cyan neural network color
-          const c = new THREE.Color('#00FF88').lerp(new THREE.Color('#00D4FF'), Math.random());
+          // Use distance ratio for a smooth color transition instead of creating new Color objects per frame
+          const ratio = distSq / maxDistanceSq;
+          tempColor.copy(colorA).lerp(colorB, ratio);
           
-          lineColors[lineIdx * 6] = c.r;
-          lineColors[lineIdx * 6 + 1] = c.g;
-          lineColors[lineIdx * 6 + 2] = c.b;
-          lineColors[lineIdx * 6 + 3] = c.r;
-          lineColors[lineIdx * 6 + 4] = c.g;
-          lineColors[lineIdx * 6 + 5] = c.b;
+          lineColors[lineIdx * 6] = tempColor.r;
+          lineColors[lineIdx * 6 + 1] = tempColor.g;
+          lineColors[lineIdx * 6 + 2] = tempColor.b;
+          lineColors[lineIdx * 6 + 3] = tempColor.r;
+          lineColors[lineIdx * 6 + 4] = tempColor.g;
+          lineColors[lineIdx * 6 + 5] = tempColor.b;
 
-          // Encode alpha into a custom attribute if needed, or handle in shader.
-          // For simplicity, we just rely on additive blending and density.
-          
           lineIdx++;
         }
       }
@@ -157,7 +160,7 @@ const NeuralNetwork = () => {
 export default function GlobalScene() {
   return (
     <div className="fixed inset-0 z-0 pointer-events-none bg-background-base">
-      <Canvas camera={{ position: [0, 0, 8], fov: 60 }}>
+      <Canvas camera={{ position: [0, 0, 8], fov: 60 }} dpr={[1, 1.5]}>
         <color attach="background" args={['#060c09']} />
         
         {/* Core lighting */}
