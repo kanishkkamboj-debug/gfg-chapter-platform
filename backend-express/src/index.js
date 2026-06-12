@@ -52,6 +52,9 @@ app.use('/api/gallery', require('./routes/gallery'));
 app.use('/api/hall-of-fame', require('./routes/hall-of-fame'));
 app.use('/api/resources', require('./routes/resources'));
 app.use('/api/contact', require('./routes/contact'));
+app.use('/api/duty-leaves', require('./routes/duty-leaves'));
+app.use('/api/certificates', require('./routes/certificates'));
+app.use('/api/analytics', require('./routes/analytics'));
 app.use('/api/users', authMiddleware, require('./routes/users'));
 
 // WebSocket for live updates

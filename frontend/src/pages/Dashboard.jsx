@@ -9,6 +9,10 @@ import AdminUsers from '../components/admin/AdminUsers';
 import AdminResources from '../components/admin/AdminResources';
 import AdminHallOfFame from '../components/admin/AdminHallOfFame';
 import AdminGallery from '../components/admin/AdminGallery';
+import DutyLeavePortal from '../components/dashboard/DutyLeavePortal';
+import CertificatesPortal from '../components/dashboard/CertificatesPortal';
+import AdminDutyLeave from '../components/admin/AdminDutyLeave';
+import AdminAnalyticsDashboard from '../components/admin/AdminAnalyticsDashboard';
 
 export const DashboardPage = ({ isAdmin = false }) => {
   const { user } = useApp();
@@ -157,56 +161,14 @@ export const DashboardPage = ({ isAdmin = false }) => {
           )}
 
           {isAdmin && activeTab === 'analytics' && (
-             <motion.div key="admin-analytics" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-8">
-                <div>
-                   <h3 className="text-xl font-bold text-white mb-4">Chapter Analytics</h3>
-                   <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                      {['Total Members', 'Active Members', 'Event Registrations', 'Event Attendance', 'Monthly Growth', 'Resource Usage'].map((item, i) => (
-                         <div key={i} className="bg-[#0c1610] p-4 rounded-xl border border-[#1a3324]">
-                            <div className="text-[#a3b8cc] text-xs uppercase mb-1">{item}</div>
-                            <div className="text-xl font-bold text-white">{Math.floor(Math.random() * 500) + 50}</div>
-                         </div>
-                      ))}
-                   </div>
-                </div>
-                <div>
-                   <h3 className="text-xl font-bold text-white mb-4">Team & Individual Analytics</h3>
-                   <div className="grid md:grid-cols-2 gap-6">
-                      <div className="bg-[#0c1610] p-6 rounded-3xl border border-[#1a3324]">
-                         <h4 className="font-bold text-[#00FF88] mb-4">Team Performance</h4>
-                         <ul className="space-y-3 text-sm text-[#a3b8cc]">
-                            <li className="flex justify-between"><span>Event Team</span> <span className="text-white">92%</span></li>
-                            <li className="flex justify-between"><span>Content Team</span> <span className="text-white">88%</span></li>
-                            <li className="flex justify-between"><span>Design Team</span> <span className="text-white">95%</span></li>
-                            <li className="flex justify-between"><span>Technical Team</span> <span className="text-white">98%</span></li>
-                         </ul>
-                      </div>
-                      <div className="bg-[#0c1610] p-6 rounded-3xl border border-[#1a3324]">
-                         <h4 className="font-bold text-[#00D4FF] mb-4">Individual Contributions</h4>
-                         <ul className="space-y-3 text-sm text-[#a3b8cc]">
-                            <li className="flex justify-between"><span>Events Managed</span> <span className="text-white">12</span></li>
-                            <li className="flex justify-between"><span>Tasks Completed</span> <span className="text-white">45</span></li>
-                            <li className="flex justify-between"><span>Volunteer Hours</span> <span className="text-white">120h</span></li>
-                            <li className="flex justify-between"><span>Contribution Score</span> <span className="text-[#00FF88] font-bold">A+</span></li>
-                         </ul>
-                      </div>
-                   </div>
-                </div>
+             <motion.div key="admin-analytics" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+               <AdminAnalyticsDashboard />
              </motion.div>
           )}
 
           {isAdmin && activeTab === 'duty-leave-mgmt' && (
              <motion.div key="admin-dl" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
-                <div className="bg-[#0c1610] rounded-3xl border border-[#1a3324] overflow-hidden">
-                   <table className="w-full text-left text-sm">
-                      <thead className="bg-[#112218] text-[#a3b8cc] uppercase text-xs font-mono">
-                         <tr><th className="p-4">Student</th><th className="p-4">Type</th><th className="p-4">Event</th><th className="p-4">Actions</th></tr>
-                      </thead>
-                      <tbody className="divide-y divide-[#1a3324]">
-                         <tr className="hover:bg-[#112218] transition-colors"><td className="p-4 text-white">John Doe</td><td className="p-4 text-[#00D4FF]">Special DL</td><td className="p-4 text-[#a3b8cc]">Regional Hackathon</td><td className="p-4 flex gap-2"><button onClick={() => alert('Approved')} className="px-3 py-1 bg-[#00FF88]/20 text-[#00FF88] rounded text-xs hover:bg-[#00FF88] hover:text-[#0a1118] transition-colors">Approve</button><button onClick={() => alert('Rejected')} className="px-3 py-1 bg-red-500/20 text-red-500 rounded text-xs hover:bg-red-500 hover:text-white transition-colors">Reject</button><button onClick={() => alert('Generating PDF...')} className="px-3 py-1 border border-[#1a3324] text-white rounded text-xs hover:bg-white hover:text-black transition-colors">Gen PDF</button></td></tr>
-                      </tbody>
-                   </table>
-                </div>
+               <AdminDutyLeave />
              </motion.div>
           )}
 
@@ -247,7 +209,7 @@ export const DashboardPage = ({ isAdmin = false }) => {
           )}
 
           {/* Fallback for other tabs */}
-          {activeTab !== 'dashboard' && activeTab !== 'duty-leave' && activeTab !== 'analytics' && activeTab !== 'duty-leave-mgmt' && activeTab !== 'transmissions' && activeTab !== 'events-mgmt' && activeTab !== 'users' && activeTab !== 'resources' && activeTab !== 'hall-of-fame' && activeTab !== 'gallery' && (
+          {activeTab !== 'dashboard' && activeTab !== 'duty-leave' && activeTab !== 'certificates' && activeTab !== 'analytics' && activeTab !== 'duty-leave-mgmt' && activeTab !== 'transmissions' && activeTab !== 'events-mgmt' && activeTab !== 'users' && activeTab !== 'resources' && activeTab !== 'hall-of-fame' && activeTab !== 'gallery' && (
              <motion.div key="fallback" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="bg-[#0c1610] p-12 rounded-3xl border border-[#1a3324] text-center">
                 <span className="material-symbols-outlined text-4xl text-[#1a3324] mb-4">construction</span>
                 <h3 className="text-xl font-bold text-white mb-2">Module Provisioned</h3>
