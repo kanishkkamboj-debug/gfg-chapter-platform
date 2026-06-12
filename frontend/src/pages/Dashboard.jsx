@@ -204,16 +204,16 @@ export const DashboardPage = ({ isAdmin = false }) => {
                    <h3 className="text-lg font-bold text-white mb-6">Insights & System Overview</h3>
                    <div className="flex-1 space-y-4 overflow-y-auto custom-scrollbar pr-2">
                      <div className="p-4 bg-[#112218] rounded-xl border border-[#1a3324]">
-                       <h4 className="text-[#00FF88] text-sm font-bold mb-1">Transmission Health</h4>
-                       <p className="text-[#a3b8cc] text-xs">Activity is up 24% compared to last week. Automated systems are functioning normally with 0% dropped packets.</p>
+                       <h4 className="text-[#00FF88] text-sm font-bold mb-1">Platform Activity</h4>
+                       <p className="text-[#a3b8cc] text-xs">There are {adminStats?.active_members || 0} active members this month out of {adminStats?.total_members || 0} total users. Systems are functioning normally.</p>
                      </div>
                      <div className="p-4 bg-[#112218] rounded-xl border border-[#1a3324]">
-                       <h4 className="text-[#00D4FF] text-sm font-bold mb-1">User Engagement</h4>
-                       <p className="text-[#a3b8cc] text-xs">Peak active users hit 65 today. Engagement in the coding resources module increased significantly.</p>
+                       <h4 className="text-[#00D4FF] text-sm font-bold mb-1">Resource & Event Metrics</h4>
+                       <p className="text-[#a3b8cc] text-xs">{adminStats?.total_events || 0} events have been hosted and {adminStats?.total_resources || 0} resources have been shared on the platform.</p>
                      </div>
                      <div className="p-4 bg-[#112218] rounded-xl border border-[#1a3324]">
                        <h4 className="text-yellow-400 text-sm font-bold mb-1">Action Required</h4>
-                       <p className="text-[#a3b8cc] text-xs">There are 14 pending duty leave requests waiting for administrative approval.</p>
+                       <p className="text-[#a3b8cc] text-xs">There are {adminStats?.pending_leaves || 0} pending duty leave requests waiting for administrative approval.</p>
                      </div>
                    </div>
                  </div>
