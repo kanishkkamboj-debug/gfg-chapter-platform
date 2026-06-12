@@ -25,6 +25,8 @@ const createEventSchema = z.object({
   image_url: z.string().url().optional()
 });
 
+const updateEventSchema = createEventSchema.partial();
+
 // Get all events with pagination and filtering
 router.get('/', validate({ query: getEventsQuerySchema }), async (req, res) => {
   const { page, limit, event_type, search, upcoming } = req.query;
@@ -177,6 +179,41 @@ router.post('/:id/unregister', authMiddleware, async (req, res) => {
 
   global.broadcastUpdate('events', { type: 'unregistration', event_id });
 
+  res.json({ success: true });
+});
+
+// Update event
+router.put('/:id', authMiddleware, requireRole(['admin']), validate({ body: updateEventSchema }), async (req, res) => {
+  const eventId = parseInt(req.params.id);
+  if (isNaN(eventId)) return res.status(400).json({ error: 'Invalid event ID format' });
+
+  const { title, description, event_type, start_date, end_date, location, capacity, image_url } = req.body;
+
+  const result = await pool.query(
+    'UPDATE events SET title = COALESCE($1, title), description = COALESCE($2, description), event_type = COALESCE($3, event_type), start_date = COALESCE($4, start_date), end_date = COALESCE($5, end_date), location = COALESCE($6, location), capacity = COALESCE($7, capacity), image_url = COALESCE($8, image_url), updated_at = CURRENT_TIMESTAMP WHERE id = $9 RETURNING *',
+    [title, description, event_type, start_date, end_date, location, capacity, image_url, eventId]
+  );
+
+  if (result.rows.length === 0) {
+    return res.status(404).json({ error: 'Event not found' });
+  }
+
+  global.broadcastUpdate('events', { type: 'update', data: result.rows[0] });
+  res.json(result.rows[0]);
+});
+
+// Delete event
+router.delete('/:id', authMiddleware, requireRole(['admin']), async (req, res) => {
+  const eventId = parseInt(req.params.id);
+  if (isNaN(eventId)) return res.status(400).json({ error: 'Invalid event ID format' });
+
+  const result = await pool.query('DELETE FROM events WHERE id = $1 RETURNING id', [eventId]);
+
+  if (result.rows.length === 0) {
+    return res.status(404).json({ error: 'Event not found' });
+  }
+
+  global.broadcastUpdate('events', { type: 'delete', id: eventId });
   res.json({ success: true });
 });
 

@@ -7,6 +7,7 @@ const AdminEvents = () => {
   const [error, setError] = useState('');
   
   const [isCreating, setIsCreating] = useState(false);
+  const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({
     title: '', description: '', event_type: 'workshop', 
     start_date: '', end_date: '', location: '', capacity: '', image_url: ''
@@ -29,15 +30,18 @@ const AdminEvents = () => {
     fetchEvents();
   }, []);
 
-  const handleCreate = async (e) => {
+  const handleCreateOrUpdate = async (e) => {
     e.preventDefault();
     try {
       const payload = { ...formData };
       if (payload.capacity) payload.capacity = parseInt(payload.capacity);
       else delete payload.capacity;
       
-      const res = await fetch('/api/events', {
-        method: 'POST',
+      const url = editingId ? `/api/events/${editingId}` : '/api/events';
+      const method = editingId ? 'PUT' : 'POST';
+
+      const res = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify(payload)
@@ -45,10 +49,11 @@ const AdminEvents = () => {
       
       if (!res.ok) {
         const d = await res.json();
-        throw new Error(d.error || 'Failed to create event');
+        throw new Error(d.error || `Failed to ${editingId ? 'update' : 'create'} event`);
       }
       
       setIsCreating(false);
+      setEditingId(null);
       setFormData({
         title: '', description: '', event_type: 'workshop', 
         start_date: '', end_date: '', location: '', capacity: '', image_url: ''
@@ -57,6 +62,21 @@ const AdminEvents = () => {
     } catch (err) {
       setError(err.message);
     }
+  };
+
+  const openEdit = (event) => {
+    setEditingId(event.id);
+    setFormData({
+      title: event.title || '',
+      description: event.description || '',
+      event_type: event.event_type || 'workshop',
+      start_date: event.start_date ? new Date(event.start_date).toISOString().slice(0,16) : '',
+      end_date: event.end_date ? new Date(event.end_date).toISOString().slice(0,16) : '',
+      location: event.location || '',
+      capacity: event.capacity || '',
+      image_url: event.image_url || ''
+    });
+    setIsCreating(true);
   };
 
   const handleDelete = async (id) => {
@@ -80,7 +100,11 @@ const AdminEvents = () => {
       <div className="flex justify-between items-center mb-6">
         <h3 className="text-2xl font-bold text-white">Event Architecture</h3>
         <button 
-          onClick={() => setIsCreating(true)}
+          onClick={() => {
+            setEditingId(null);
+            setFormData({ title: '', description: '', event_type: 'workshop', start_date: '', end_date: '', location: '', capacity: '', image_url: '' });
+            setIsCreating(true);
+          }}
           className="px-6 py-3 bg-[#00FF88] text-[#0a1118] font-bold rounded-xl flex items-center gap-2 hover:shadow-neon transition-shadow"
         >
           <span className="material-symbols-outlined">add</span> Create Node
@@ -103,6 +127,9 @@ const AdminEvents = () => {
                   {event.event_type}
                 </span>
                 <div className="flex gap-2">
+                  <button onClick={() => openEdit(event)} className="text-[#a3b8cc] hover:text-[#00FF88] transition-colors">
+                    <span className="material-symbols-outlined text-sm">edit</span>
+                  </button>
                   <button onClick={() => handleDelete(event.id)} className="text-[#a3b8cc] hover:text-error transition-colors">
                     <span className="material-symbols-outlined text-sm">delete</span>
                   </button>
@@ -140,13 +167,13 @@ const AdminEvents = () => {
               className="bg-[#0c1610] border border-[#1a3324] p-8 rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-y-auto custom-scrollbar"
             >
               <div className="flex justify-between items-start mb-6">
-                <h3 className="text-2xl font-bold text-white">Initialize Event Node</h3>
+                <h3 className="text-2xl font-bold text-white">{editingId ? 'Edit Event Node' : 'Initialize Event Node'}</h3>
                 <button onClick={() => setIsCreating(false)} className="text-[#a3b8cc] hover:text-white">
                   <span className="material-symbols-outlined">close</span>
                 </button>
               </div>
 
-              <form onSubmit={handleCreate} className="space-y-4">
+              <form onSubmit={handleCreateOrUpdate} className="space-y-4">
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-mono text-[#a3b8cc] mb-1">Title</label>
@@ -192,7 +219,7 @@ const AdminEvents = () => {
 
                 <div className="flex justify-end gap-4 mt-8">
                   <button type="button" onClick={() => setIsCreating(false)} className="px-6 py-3 border border-[#1a3324] text-white hover:bg-[#112218] rounded-xl font-bold">Cancel</button>
-                  <button type="submit" className="px-6 py-3 bg-[#00FF88] text-[#0a1118] hover:bg-[#00D4FF] rounded-xl font-bold">Initialize Node</button>
+                  <button type="submit" className="px-6 py-3 bg-[#00FF88] text-[#0a1118] hover:bg-[#00D4FF] rounded-xl font-bold">{editingId ? 'Update Node' : 'Initialize Node'}</button>
                 </div>
               </form>
             </motion.div>

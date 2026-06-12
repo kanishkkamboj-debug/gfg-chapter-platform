@@ -23,6 +23,23 @@ const DutyLeavePortal = () => {
 
   useEffect(() => { fetchLeaves(); }, []);
 
+  const handleDelete = async (id) => {
+    if (!confirm("Are you sure you want to withdraw this application?")) return;
+    try {
+      const res = await fetch(`/api/duty-leaves/${id}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+      if (!res.ok) {
+        const d = await res.json();
+        throw new Error(d.error || 'Failed to delete application');
+      }
+      setLeaves(leaves.filter(l => l.id !== id));
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -85,11 +102,12 @@ const DutyLeavePortal = () => {
               <th className="p-4">Type</th>
               <th className="p-4">Status</th>
               <th className="p-4 text-right">Date Applied</th>
+              <th className="p-4 text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[#1a3324]">
             {leaves.length === 0 ? (
-              <tr><td colSpan="4" className="p-8 text-center text-[#a3b8cc]">No applications found.</td></tr>
+              <tr><td colSpan="5" className="p-8 text-center text-[#a3b8cc]">No applications found.</td></tr>
             ) : (
               leaves.map(leave => (
                 <tr key={leave.id} className="hover:bg-[#112218] text-white">
@@ -101,6 +119,13 @@ const DutyLeavePortal = () => {
                     </span>
                   </td>
                   <td className="p-4 text-right text-[#a3b8cc]">{new Date(leave.created_at).toLocaleDateString()}</td>
+                  <td className="p-4 text-right">
+                    {leave.status === 'pending' && (
+                      <button onClick={() => handleDelete(leave.id)} className="text-[#a3b8cc] hover:text-red-500 transition-colors" title="Withdraw Application">
+                        <span className="material-symbols-outlined text-sm">delete</span>
+                      </button>
+                    )}
+                  </td>
                 </tr>
               ))
             )}

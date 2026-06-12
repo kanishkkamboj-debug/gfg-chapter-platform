@@ -11,6 +11,8 @@ const AdminHallOfFame = React.lazy(() => import('../components/admin/AdminHallOf
 const AdminGallery = React.lazy(() => import('../components/admin/AdminGallery'));
 const AdminDutyLeave = React.lazy(() => import('../components/admin/AdminDutyLeave'));
 const AdminAnalyticsDashboard = React.lazy(() => import('../components/admin/AdminAnalyticsDashboard'));
+const AdminAnnouncements = React.lazy(() => import('../components/admin/AdminAnnouncements'));
+const AdminCertificates = React.lazy(() => import('../components/admin/AdminCertificates'));
 import DutyLeavePortal from '../components/dashboard/DutyLeavePortal';
 import CertificatesPortal from '../components/dashboard/CertificatesPortal';
 const MemberEventsPortal = React.lazy(() => import('../components/dashboard/MemberEventsPortal'));
@@ -40,7 +42,8 @@ export const DashboardPage = ({ isAdmin = false }) => {
     { id: 'gallery', icon: 'photo_library', label: 'Gallery Management' },
     { id: 'hall-of-fame', icon: 'emoji_events', label: 'Hall of Fame' },
     { id: 'users', icon: 'manage_accounts', label: 'User Management' },
-    { id: 'duty-leave-mgmt', icon: 'fact_check', label: 'Duty Leave Mgmt' }
+    { id: 'duty-leave-mgmt', icon: 'fact_check', label: 'Duty Leave Mgmt' },
+    { id: 'certificates-mgmt', icon: 'workspace_premium', label: 'Certificates Mgmt' }
   ];
 
   const tabs = isAdmin ? adminTabs : memberTabs;
@@ -218,8 +221,20 @@ export const DashboardPage = ({ isAdmin = false }) => {
              </motion.div>
           )}
 
+          {isAdmin && activeTab === 'announcements' && (
+             <motion.div key="admin-announcements" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+               <AdminAnnouncements />
+             </motion.div>
+          )}
+
+          {isAdmin && activeTab === 'certificates-mgmt' && (
+             <motion.div key="admin-certs" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+               <AdminCertificates />
+             </motion.div>
+          )}
+
           {/* Fallback for other tabs */}
-          {activeTab !== 'dashboard' && activeTab !== 'duty-leave' && activeTab !== 'certificates' && activeTab !== 'events' && activeTab !== 'profile' && activeTab !== 'notifications' && activeTab !== 'analytics' && activeTab !== 'duty-leave-mgmt' && activeTab !== 'transmissions' && activeTab !== 'events-mgmt' && activeTab !== 'users' && activeTab !== 'resources' && activeTab !== 'hall-of-fame' && activeTab !== 'gallery' && (
+          {activeTab !== 'dashboard' && activeTab !== 'duty-leave' && activeTab !== 'certificates' && activeTab !== 'events' && activeTab !== 'profile' && activeTab !== 'notifications' && activeTab !== 'analytics' && activeTab !== 'duty-leave-mgmt' && activeTab !== 'transmissions' && activeTab !== 'events-mgmt' && activeTab !== 'users' && activeTab !== 'resources' && activeTab !== 'hall-of-fame' && activeTab !== 'gallery' && activeTab !== 'announcements' && activeTab !== 'certificates-mgmt' && (
              <motion.div key="fallback" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="bg-[#0c1610] p-12 rounded-3xl border border-[#1a3324] text-center">
                 <span className="material-symbols-outlined text-4xl text-[#1a3324] mb-4">construction</span>
                 <h3 className="text-xl font-bold text-white mb-2">Module Provisioned</h3>

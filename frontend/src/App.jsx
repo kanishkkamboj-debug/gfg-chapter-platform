@@ -26,6 +26,7 @@ const BlogsPage = lazy(() => import('./pages/Blogs'));
 const CommunityPage = lazy(() => import('./pages/Community'));
 const ProjectsPage = lazy(() => import('./pages/Projects'));
 const AboutPage = lazy(() => import('./pages/About'));
+const PublicProfilePage = lazy(() => import('./pages/PublicProfile'));
 const GuidelinesPage = lazy(() => import('./pages/Guidelines'));
 const PrivacyPage = lazy(() => import('./pages/Privacy'));
 
@@ -133,6 +134,7 @@ const AnimatedRoutes = () => {
           <Route path="/blog" element={<PageWrapper><BlogsPage /></PageWrapper>} />
           <Route path="/community" element={<PageWrapper><CommunityPage /></PageWrapper>} />
           <Route path="/projects" element={<PageWrapper><ProjectsPage /></PageWrapper>} />
+          <Route path="/profile/:username" element={<PageWrapper><PublicProfilePage /></PageWrapper>} />
           <Route
             path="/admin"
             element={

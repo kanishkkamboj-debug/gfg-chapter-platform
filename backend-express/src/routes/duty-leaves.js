@@ -81,4 +81,26 @@ router.put('/:id/status', authMiddleware, requireRole(['admin', 'faculty', 'coor
   res.json(result.rows[0]);
 });
 
+// Member: Delete pending application
+router.delete('/:id', authMiddleware, async (req, res) => {
+  const id = parseInt(req.params.id);
+  if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID format' });
+
+  // Ensure it belongs to the user and is still pending
+  const checkRes = await pool.query('SELECT status, user_id FROM duty_leaves WHERE id = $1', [id]);
+  if (checkRes.rows.length === 0) return res.status(404).json({ error: 'Duty leave not found' });
+  
+  if (checkRes.rows[0].user_id !== req.user.id) {
+    return res.status(403).json({ error: 'You can only delete your own applications' });
+  }
+
+  if (checkRes.rows[0].status !== 'pending') {
+    return res.status(400).json({ error: 'Cannot delete an application that has already been processed' });
+  }
+
+  await pool.query('DELETE FROM duty_leaves WHERE id = $1', [id]);
+  global.broadcastUpdate('duty_leaves', { type: 'delete', id });
+  res.json({ success: true });
+});
+
 module.exports = router;
