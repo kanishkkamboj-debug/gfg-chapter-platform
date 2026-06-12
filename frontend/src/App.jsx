@@ -39,7 +39,12 @@ const LoadingFallback = () => (
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated } = useApp();
+  const { isAuthenticated, loading } = useApp();
+  
+  if (loading) {
+    return <LoadingFallback />;
+  }
+  
   if (!isAuthenticated) {
     return <Navigate to="/login" />;
   }

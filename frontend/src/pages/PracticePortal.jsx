@@ -3,7 +3,6 @@ import { useApp } from '../context/AppContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import ScrollReveal from '../components/ScrollReveal';
 import TiltCard from '../components/TiltCard';
-import TiltCard from '../components/TiltCard';
 import { practiceProblems } from '../data/practiceData';
 
 const ProblemCard = React.memo(({ problem, isSolved, toggleProblemStatus }) => (
