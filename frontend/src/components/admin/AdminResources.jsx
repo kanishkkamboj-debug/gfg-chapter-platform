@@ -12,7 +12,7 @@ const AdminResources = () => {
 
   const fetchResources = async () => {
     try {
-      const res = await fetch('/api/admin/resources', { credentials: 'include' });
+      const res = await fetch('/api/resources', { credentials: 'include' });
       if (!res.ok) throw new Error('Failed to fetch resources');
       const data = await res.json();
       setResources(data.data || []);
@@ -33,7 +33,7 @@ const AdminResources = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch('/api/admin/resources', {
+      const res = await fetch('/api/resources', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -50,7 +50,7 @@ const AdminResources = () => {
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this resource?')) return;
     try {
-      const res = await fetch(`/api/admin/resources/${id}`, { method: 'DELETE', credentials: 'include' });
+      const res = await fetch(`/api/resources/${id}`, { method: 'DELETE', credentials: 'include' });
       if (!res.ok) throw new Error('Failed to delete resource');
       fetchResources();
     } catch (err) {

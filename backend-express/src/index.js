@@ -49,6 +49,7 @@ app.use('/api/announcements', require('./routes/announcements'));
 app.use('/api/events', require('./routes/events'));
 app.use('/api/team', require('./routes/team'));
 app.use('/api/gallery', require('./routes/gallery'));
+app.use('/api/hall-of-fame', require('./routes/hall-of-fame'));
 app.use('/api/resources', require('./routes/resources'));
 app.use('/api/contact', require('./routes/contact'));
 app.use('/api/users', authMiddleware, require('./routes/users'));

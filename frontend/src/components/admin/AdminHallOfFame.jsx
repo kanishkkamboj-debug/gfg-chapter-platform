@@ -4,20 +4,21 @@ import { motion, AnimatePresence } from 'framer-motion';
 const AdminHallOfFame = () => {
   const [achievements, setAchievements] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
   const [formData, setFormData] = useState({
-    user_id: '', achievement_title: '', achievement_type: 'Hackathon', description: ''
+    user_id: '', achievement_title: '', achievement_type: 'Hackathon', description: '', company: ''
   });
 
   const fetchAchievements = async () => {
     try {
-      const res = await fetch('/api/admin/hall-of-fame', { credentials: 'include' });
+      const res = await fetch('/api/hall-of-fame', { credentials: 'include' });
+      if (!res.ok) throw new Error('Failed to fetch hall of fame records');
       const data = await res.json();
       setAchievements(data.data || []);
     } catch (err) {
-      setAchievements([
-        { id: 1, user_id: 101, username: 'alex_kumar', achievement_title: '1st Place Winter Hackathon', achievement_type: 'Hackathon', created_at: new Date() }
-      ]);
+      console.error(err);
+      setError(err.message);
     } finally { setLoading(false); }
   };
 
@@ -25,7 +26,33 @@ const AdminHallOfFame = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setShowAddModal(false);
+    try {
+      const res = await fetch('/api/hall-of-fame', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ ...formData, user_id: parseInt(formData.user_id) })
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to add record');
+      }
+      setShowAddModal(false);
+      fetchAchievements();
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Delete this record?')) return;
+    try {
+      const res = await fetch(`/api/hall-of-fame/${id}`, { method: 'DELETE', credentials: 'include' });
+      if (!res.ok) throw new Error('Failed to delete');
+      fetchAchievements();
+    } catch (err) {
+      alert(err.message);
+    }
   };
 
   return (
@@ -36,6 +63,8 @@ const AdminHallOfFame = () => {
           <span className="material-symbols-outlined text-[18px]">workspace_premium</span> Add Record
         </button>
       </div>
+
+      {error && <div className="p-4 bg-red-500/10 text-red-500 border border-red-500/30 rounded-xl">{error}</div>}
 
       <div className="bg-[#0c1610] rounded-3xl border border-[#1a3324] overflow-hidden">
         <table className="w-full text-left text-sm">
@@ -50,10 +79,12 @@ const AdminHallOfFame = () => {
           <tbody className="divide-y divide-[#1a3324]">
             {achievements.map(item => (
               <tr key={item.id} className="hover:bg-[#112218] text-white">
-                <td className="p-4 font-mono text-[#00FF88]">UID: {item.user_id} <br/><span className="text-xs text-[#a3b8cc]">{item.username}</span></td>
+                <td className="p-4 font-mono text-[#00FF88]">UID: {item.user_id} <br/><span className="text-xs text-[#a3b8cc]">{item.username || item.full_name}</span></td>
                 <td className="p-4 font-bold">{item.achievement_title}</td>
                 <td className="p-4"><span className="px-2 py-1 bg-yellow-400/10 text-yellow-400 rounded text-xs">{item.achievement_type}</span></td>
-                <td className="p-4 text-right"><button className="text-red-400 p-2"><span className="material-symbols-outlined">delete</span></button></td>
+                <td className="p-4 text-right">
+                  <button onClick={() => handleDelete(item.id)} className="text-red-400 p-2"><span className="material-symbols-outlined">delete</span></button>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -71,15 +102,15 @@ const AdminHallOfFame = () => {
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label className="text-xs font-mono text-[#a3b8cc] uppercase">User ID</label>
-                  <input type="number" required className="w-full bg-[#112218] border border-[#1a3324] rounded-xl px-4 py-3 text-white mt-1" />
+                  <input type="number" required value={formData.user_id} onChange={e => setFormData({...formData, user_id: e.target.value})} className="w-full bg-[#112218] border border-[#1a3324] rounded-xl px-4 py-3 text-white mt-1" />
                 </div>
                 <div>
                   <label className="text-xs font-mono text-[#a3b8cc] uppercase">Title</label>
-                  <input type="text" required className="w-full bg-[#112218] border border-[#1a3324] rounded-xl px-4 py-3 text-white mt-1" />
+                  <input type="text" required value={formData.achievement_title} onChange={e => setFormData({...formData, achievement_title: e.target.value})} className="w-full bg-[#112218] border border-[#1a3324] rounded-xl px-4 py-3 text-white mt-1" />
                 </div>
                 <div>
                   <label className="text-xs font-mono text-[#a3b8cc] uppercase">Type</label>
-                  <select className="w-full bg-[#112218] border border-[#1a3324] rounded-xl px-4 py-3 text-white mt-1">
+                  <select value={formData.achievement_type} onChange={e => setFormData({...formData, achievement_type: e.target.value})} className="w-full bg-[#112218] border border-[#1a3324] rounded-xl px-4 py-3 text-white mt-1">
                     <option>Hackathon</option><option>Coding Contest</option><option>Top Contributor</option>
                   </select>
                 </div>

@@ -94,4 +94,19 @@ router.post('/:id/view', async (req, res) => {
   res.json(result.rows[0]);
 });
 
+// Delete resource (Requires Auth)
+router.delete('/:id', authMiddleware, requireRole(['admin']), async (req, res) => {
+  const resId = parseInt(req.params.id);
+  if (isNaN(resId)) return res.status(400).json({ error: 'Invalid ID format' });
+
+  const result = await pool.query('DELETE FROM resources WHERE id = $1 RETURNING id', [resId]);
+
+  if (result.rows.length === 0) {
+    return res.status(404).json({ error: 'Resource not found' });
+  }
+
+  global.broadcastUpdate('resources', { type: 'delete', id: req.params.id });
+  res.json({ success: true });
+});
+
 module.exports = router;

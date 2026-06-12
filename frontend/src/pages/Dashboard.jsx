@@ -6,6 +6,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import AdminTransmissions from '../components/admin/AdminTransmissions';
 import AdminEvents from '../components/admin/AdminEvents';
 import AdminUsers from '../components/admin/AdminUsers';
+import AdminResources from '../components/admin/AdminResources';
+import AdminHallOfFame from '../components/admin/AdminHallOfFame';
+import AdminGallery from '../components/admin/AdminGallery';
 
 export const DashboardPage = ({ isAdmin = false }) => {
   const { user } = useApp();
@@ -225,8 +228,26 @@ export const DashboardPage = ({ isAdmin = false }) => {
              </motion.div>
           )}
 
+          {isAdmin && activeTab === 'resources' && (
+             <motion.div key="admin-resources" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+               <AdminResources />
+             </motion.div>
+          )}
+
+          {isAdmin && activeTab === 'hall-of-fame' && (
+             <motion.div key="admin-hof" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+               <AdminHallOfFame />
+             </motion.div>
+          )}
+
+          {isAdmin && activeTab === 'gallery' && (
+             <motion.div key="admin-gallery" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+               <AdminGallery />
+             </motion.div>
+          )}
+
           {/* Fallback for other tabs */}
-          {activeTab !== 'dashboard' && activeTab !== 'duty-leave' && activeTab !== 'analytics' && activeTab !== 'duty-leave-mgmt' && activeTab !== 'transmissions' && activeTab !== 'events-mgmt' && activeTab !== 'users' && (
+          {activeTab !== 'dashboard' && activeTab !== 'duty-leave' && activeTab !== 'analytics' && activeTab !== 'duty-leave-mgmt' && activeTab !== 'transmissions' && activeTab !== 'events-mgmt' && activeTab !== 'users' && activeTab !== 'resources' && activeTab !== 'hall-of-fame' && activeTab !== 'gallery' && (
              <motion.div key="fallback" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="bg-[#0c1610] p-12 rounded-3xl border border-[#1a3324] text-center">
                 <span className="material-symbols-outlined text-4xl text-[#1a3324] mb-4">construction</span>
                 <h3 className="text-xl font-bold text-white mb-2">Module Provisioned</h3>

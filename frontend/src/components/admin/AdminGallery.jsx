@@ -3,15 +3,54 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const AdminGallery = () => {
   const [images, setImages] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [formData, setFormData] = useState({
+    title: '', image_url: '', category: 'Community Events'
+  });
 
-  useEffect(() => {
-    // Mocked data for UI demonstration until backend is connected
-    setImages([
-      { id: 1, title: 'Winter Hackathon Group Photo', category: 'Hackathons', url: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80&w=500' },
-      { id: 2, title: 'Web Dev Workshop', category: 'Workshops', url: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&q=80&w=600' }
-    ]);
-  }, []);
+  const fetchImages = async () => {
+    try {
+      const res = await fetch('/api/gallery', { credentials: 'include' });
+      if (!res.ok) throw new Error('Failed to fetch gallery');
+      const data = await res.json();
+      setImages(data.data || []);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchImages(); }, []);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch('/api/gallery', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(formData)
+      });
+      if (!res.ok) throw new Error('Failed to upload');
+      setShowAddModal(false);
+      fetchImages();
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Delete image?')) return;
+    try {
+      const res = await fetch(`/api/gallery/${id}`, { method: 'DELETE', credentials: 'include' });
+      if (!res.ok) throw new Error('Failed to delete');
+      fetchImages();
+    } catch (err) {
+      alert(err.message);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -24,10 +63,10 @@ const AdminGallery = () => {
 
       <div className="grid md:grid-cols-3 gap-6">
         {images.map(img => (
-          <div key={img.id} className="bg-[#0c1610] rounded-2xl border border-[#1a3324] overflow-hidden group">
+          <div key={img.id} className="bg-[#0c1610] rounded-2xl border border-[#1a3324] overflow-hidden group relative">
             <div className="h-40 overflow-hidden relative">
-              <img src={img.url} alt={img.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-              <button className="absolute top-2 right-2 p-1.5 bg-red-500/80 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">
+              <img src={img.image_url} alt={img.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+              <button onClick={() => handleDelete(img.id)} className="absolute top-2 right-2 p-1.5 bg-red-500/80 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">
                 <span className="material-symbols-outlined text-[16px]">delete</span>
               </button>
             </div>
@@ -47,18 +86,18 @@ const AdminGallery = () => {
                 <h3 className="text-xl font-bold text-white">Upload Media</h3>
                 <button onClick={() => setShowAddModal(false)} className="text-[#a3b8cc] hover:text-white"><span className="material-symbols-outlined">close</span></button>
               </div>
-              <form onSubmit={(e) => { e.preventDefault(); setShowAddModal(false); }} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label className="text-xs font-mono text-[#a3b8cc] uppercase">Image Title</label>
-                  <input type="text" required className="w-full bg-[#112218] border border-[#1a3324] rounded-xl px-4 py-3 text-white mt-1" />
+                  <input type="text" required value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full bg-[#112218] border border-[#1a3324] rounded-xl px-4 py-3 text-white mt-1" />
                 </div>
                 <div>
                   <label className="text-xs font-mono text-[#a3b8cc] uppercase">Image URL</label>
-                  <input type="url" required className="w-full bg-[#112218] border border-[#1a3324] rounded-xl px-4 py-3 text-white mt-1" />
+                  <input type="url" required value={formData.image_url} onChange={e => setFormData({...formData, image_url: e.target.value})} className="w-full bg-[#112218] border border-[#1a3324] rounded-xl px-4 py-3 text-white mt-1" />
                 </div>
                 <div>
                   <label className="text-xs font-mono text-[#a3b8cc] uppercase">Category</label>
-                  <select className="w-full bg-[#112218] border border-[#1a3324] rounded-xl px-4 py-3 text-white mt-1">
+                  <select value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} className="w-full bg-[#112218] border border-[#1a3324] rounded-xl px-4 py-3 text-white mt-1">
                     <option>Workshops</option><option>Hackathons</option><option>Community Events</option>
                   </select>
                 </div>
