@@ -5,14 +5,14 @@ const CustomCursor = () => {
   const [isHovered, setIsHovered] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   
-  // Spring config for smooth following
-  const springConfig = { damping: 25, stiffness: 150, mass: 0.5 };
+  // Spring config for smooth, non-fluctuating following
+  const springConfig = { damping: 35, stiffness: 300, mass: 0.1 };
   
   const cursorX = useSpring(-100, springConfig);
   const cursorY = useSpring(-100, springConfig);
   
-  const dotX = useSpring(-100, { damping: 40, stiffness: 400 });
-  const dotY = useSpring(-100, { damping: 40, stiffness: 400 });
+  const dotX = useSpring(-100, { damping: 50, stiffness: 450, mass: 0.1 });
+  const dotY = useSpring(-100, { damping: 50, stiffness: 450, mass: 0.1 });
 
   useEffect(() => {
     // Only show custom cursor on non-touch devices

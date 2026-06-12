@@ -26,6 +26,8 @@ const BlogsPage = lazy(() => import('./pages/Blogs'));
 const CommunityPage = lazy(() => import('./pages/Community'));
 const ProjectsPage = lazy(() => import('./pages/Projects'));
 const AboutPage = lazy(() => import('./pages/About'));
+const GuidelinesPage = lazy(() => import('./pages/Guidelines'));
+const PrivacyPage = lazy(() => import('./pages/Privacy'));
 
 // Loading Spinner
 const LoadingFallback = () => (
@@ -118,6 +120,8 @@ const AnimatedRoutes = () => {
           <Route path="/events" element={<PageWrapper><EventsPage /></PageWrapper>} />
           <Route path="/events/:id" element={<PageWrapper><EventDetailPage /></PageWrapper>} />
           <Route path="/about" element={<PageWrapper><AboutPage /></PageWrapper>} />
+          <Route path="/guidelines" element={<PageWrapper><GuidelinesPage /></PageWrapper>} />
+          <Route path="/privacy" element={<PageWrapper><PrivacyPage /></PageWrapper>} />
           <Route path="/team" element={<PageWrapper><TeamPage /></PageWrapper>} />
           <Route path="/resources" element={<PageWrapper><ResourcesPage /></PageWrapper>} />
           <Route path="/gallery" element={<PageWrapper><GalleryPage /></PageWrapper>} />
@@ -196,8 +200,8 @@ const Footer = () => (
             <div>
               <h4 className="font-mono text-xs font-semibold text-white mb-6 uppercase tracking-wider">Legal</h4>
               <ul className="space-y-4 text-text-muted text-sm">
-                <li><Link to="/about" className="hover:text-accent-mint transition-colors inline-block">Community Guidelines</Link></li>
-                <li><Link to="/about" className="hover:text-accent-mint transition-colors inline-block">Privacy Protocol</Link></li>
+                <li><Link to="/guidelines" className="hover:text-accent-mint transition-colors inline-block">Community Guidelines</Link></li>
+                <li><Link to="/privacy" className="hover:text-accent-mint transition-colors inline-block">Privacy Protocol</Link></li>
                 <li>
                   <Link to="/contact" className="text-accent-mint hover:text-white flex items-center gap-2 transition-colors mt-8 group">
                     <span>Contact Protocol</span>

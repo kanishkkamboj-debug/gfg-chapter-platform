@@ -11,6 +11,7 @@ export const RegisterPage = () => {
     email: '',
     password: '',
     confirmPassword: '',
+    masterKey: '',
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -34,9 +35,9 @@ export const RegisterPage = () => {
     try {
       setLoading(true);
       setError('');
-      // Passing interests alongside username(from email) and full name
+      // Passing interests alongside username(from email), full name, and optional master key
       const username = formData.email.split('@')[0];
-      await register(formData.email, formData.password, username, formData.fullName);
+      await register(formData.email, formData.password, username, formData.fullName, formData.masterKey);
       navigate('/dashboard');
     } catch (err) {
       setError(err.message || 'Registration failed');
@@ -116,6 +117,17 @@ export const RegisterPage = () => {
                   placeholder="••••••••"
                 />
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs font-mono text-text-muted uppercase tracking-wider pl-1">Admin Master Key (Optional)</label>
+              <input
+                type="password"
+                value={formData.masterKey}
+                onChange={(e) => setFormData({...formData, masterKey: e.target.value})}
+                className="w-full bg-surface-container border border-border-low-opacity rounded-2xl px-5 py-4 text-white focus:outline-none focus:border-accent-mint transition-colors"
+                placeholder="Leave blank for regular member"
+              />
             </div>
 
             <div className="pt-6 border-t border-border-low-opacity">

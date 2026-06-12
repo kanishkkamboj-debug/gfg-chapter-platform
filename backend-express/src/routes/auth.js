@@ -11,7 +11,8 @@ const registerSchema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
   username: z.string().min(3),
-  full_name: z.string().min(1)
+  full_name: z.string().min(1),
+  master_key: z.string().optional()
 });
 
 const loginSchema = z.object({
@@ -21,13 +22,18 @@ const loginSchema = z.object({
 
 // Register
 router.post('/register', authLimiter, validate({ body: registerSchema }), async (req, res) => {
-  const { email, password, username, full_name } = req.body;
+  const { email, password, username, full_name, master_key } = req.body;
   
   const hashedPassword = await bcrypt.hash(password, 10);
   
+  let role = 'member';
+  if (master_key && process.env.ADMIN_MASTER_KEY && master_key === process.env.ADMIN_MASTER_KEY) {
+    role = 'admin';
+  }
+  
   const result = await pool.query(
     'INSERT INTO users (email, password_hash, username, full_name, role) VALUES ($1, $2, $3, $4, $5) RETURNING id, email, username, full_name, role',
-    [email, hashedPassword, username, full_name, 'member']
+    [email, hashedPassword, username, full_name, role]
   );
 
   const token = jwt.sign(
