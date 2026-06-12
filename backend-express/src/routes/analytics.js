@@ -30,4 +30,45 @@ router.get('/', authMiddleware, requireRole(['admin', 'faculty', 'coordinator'])
   }
 });
 
+router.get('/historical', authMiddleware, requireRole(['admin', 'faculty', 'coordinator']), async (req, res) => {
+  try {
+    // Generate the last 7 days of dates in SQL
+    const historicalQuery = `
+      WITH dates AS (
+        SELECT generate_series(
+          current_date - interval '6 days',
+          current_date,
+          '1 day'::interval
+        )::date as day
+      ),
+      user_counts AS (
+        SELECT DATE(joined_at) as day, COUNT(*) as users_count
+        FROM users
+        WHERE joined_at >= current_date - interval '6 days'
+        GROUP BY DATE(joined_at)
+      ),
+      ticket_counts AS (
+        SELECT DATE(created_at) as day, COUNT(*) as transmissions_count
+        FROM support_tickets
+        WHERE created_at >= current_date - interval '6 days'
+        GROUP BY DATE(created_at)
+      )
+      SELECT 
+        to_char(d.day, 'Dy') as name,
+        COALESCE(u.users_count, 0) as users,
+        COALESCE(t.transmissions_count, 0) as transmissions
+      FROM dates d
+      LEFT JOIN user_counts u ON d.day = u.day
+      LEFT JOIN ticket_counts t ON d.day = t.day
+      ORDER BY d.day ASC;
+    `;
+    
+    const result = await pool.query(historicalQuery);
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Historical Analytics Error:', err);
+    res.status(500).json({ error: 'Failed to fetch historical analytics' });
+  }
+});
+
 module.exports = router;

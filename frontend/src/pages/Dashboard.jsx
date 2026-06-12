@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import ScrollReveal from '../components/ScrollReveal';
 import TiltCard from '../components/TiltCard';
@@ -23,6 +23,24 @@ const NotificationsPortal = React.lazy(() => import('../components/dashboard/Not
 export const DashboardPage = ({ isAdmin = false }) => {
   const { user } = useApp();
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [adminStats, setAdminStats] = useState(null);
+
+  useEffect(() => {
+    if (isAdmin && activeTab === 'dashboard') {
+      const fetchStats = async () => {
+        try {
+          const res = await fetch('/api/analytics', { credentials: 'include' });
+          if (res.ok) {
+            const data = await res.json();
+            setAdminStats(data);
+          }
+        } catch (err) {
+          console.error("Failed to fetch admin stats:", err);
+        }
+      };
+      fetchStats();
+    }
+  }, [isAdmin, activeTab]);
 
   const memberTabs = [
     { id: 'dashboard', icon: 'dashboard', label: 'Dashboard' },
@@ -160,15 +178,21 @@ export const DashboardPage = ({ isAdmin = false }) => {
                <div className="grid md:grid-cols-3 gap-6 mb-8">
                   <div className="bg-[#0c1610] p-6 rounded-2xl border border-[#1a3324]">
                     <h4 className="text-[#a3b8cc] text-xs font-mono mb-2 uppercase">Overview Statistics</h4>
-                    <div className="text-3xl font-bold text-[#00FF88] mb-1">1,420 Users</div>
+                    <div className="text-3xl font-bold text-[#00FF88] mb-1">
+                      {adminStats ? adminStats.total_members : '...'} Users
+                    </div>
                   </div>
                   <div className="bg-[#0c1610] p-6 rounded-2xl border border-[#1a3324]">
-                    <h4 className="text-[#a3b8cc] text-xs font-mono mb-2 uppercase">Recent Activities</h4>
-                    <div className="text-3xl font-bold text-white mb-1">45 Edits</div>
+                    <h4 className="text-[#a3b8cc] text-xs font-mono mb-2 uppercase">Total Events</h4>
+                    <div className="text-3xl font-bold text-white mb-1">
+                      {adminStats ? adminStats.total_events : '...'} Events
+                    </div>
                   </div>
                   <div className="bg-[#0c1610] p-6 rounded-2xl border border-[#1a3324]">
                     <h4 className="text-[#a3b8cc] text-xs font-mono mb-2 uppercase">Pending Requests</h4>
-                    <div className="text-3xl font-bold text-yellow-400 mb-1">14 Leaves</div>
+                    <div className="text-3xl font-bold text-yellow-400 mb-1">
+                      {adminStats ? adminStats.pending_leaves : '...'} Leaves
+                    </div>
                   </div>
                </div>
 
