@@ -13,6 +13,7 @@ const AnnouncementsPage = lazy(() => import('./pages/Announcements'));
 const AnnouncementDetailPage = lazy(() => import('./pages/AnnouncementDetail'));
 const EventsPage = lazy(() => import('./pages/Events'));
 const EventDetailPage = lazy(() => import('./pages/EventDetail'));
+const EventScannerPage = lazy(() => import('./pages/EventScanner'));
 const LoginPage = lazy(() => import('./pages/Login'));
 const RegisterPage = lazy(() => import('./pages/Register'));
 const TeamPage = lazy(() => import('./pages/Team'));
@@ -118,6 +119,7 @@ const AnimatedRoutes = () => {
           <Route path="/announcements/:id" element={<PageWrapper><AnnouncementDetailPage /></PageWrapper>} />
           <Route path="/events" element={<PageWrapper><EventsPage /></PageWrapper>} />
           <Route path="/events/:id" element={<PageWrapper><EventDetailPage /></PageWrapper>} />
+          <Route path="/events/:id/scan" element={<PageWrapper><EventScannerPage /></PageWrapper>} />
           <Route path="/about" element={<PageWrapper><AboutPage /></PageWrapper>} />
           <Route path="/guidelines" element={<PageWrapper><GuidelinesPage /></PageWrapper>} />
           <Route path="/privacy" element={<PageWrapper><PrivacyPage /></PageWrapper>} />

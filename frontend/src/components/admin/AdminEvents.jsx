@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { QRCodeSVG } from 'qrcode.react';
 import ImageUploader from './ImageUploader';
 
 const AdminEvents = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState(null);
   
   const [isCreating, setIsCreating] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [showQrFor, setShowQrFor] = useState(null);
   const [formData, setFormData] = useState({
     title: '', description: '', event_type: 'workshop', 
     start_date: '', end_date: '', location: '', capacity: '', image_url: '',
@@ -130,6 +132,9 @@ const AdminEvents = () => {
                   {event.event_type}
                 </span>
                 <div className="flex gap-2">
+                  <button onClick={() => setShowQrFor(event)} className="text-[#a3b8cc] hover:text-[#00FF88] transition-colors" title="Open QR Scanner">
+                    <span className="material-symbols-outlined text-sm">qr_code_scanner</span>
+                  </button>
                   <button onClick={() => openEdit(event)} className="text-[#a3b8cc] hover:text-[#00FF88] transition-colors">
                     <span className="material-symbols-outlined text-sm">edit</span>
                   </button>
@@ -238,6 +243,34 @@ const AdminEvents = () => {
                   <button type="submit" className="px-6 py-3 bg-[#00FF88] text-[#0a1118] hover:bg-[#00D4FF] rounded-xl font-bold">{editingId ? 'Update Node' : 'Initialize Node'}</button>
                 </div>
               </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showQrFor && (
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-[#0a1118]/90 backdrop-blur-sm"
+          >
+            <motion.div 
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              className="bg-white p-8 rounded-3xl flex flex-col items-center relative max-w-sm w-full"
+            >
+              <button onClick={() => setShowQrFor(null)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-800">
+                <span className="material-symbols-outlined">close</span>
+              </button>
+              <h3 className="text-xl font-bold text-gray-900 mb-6 text-center">{showQrFor.title}</h3>
+              <div className="bg-white p-4 rounded-xl shadow-lg mb-6 border-4 border-[#00FF88]">
+                <QRCodeSVG value={`${window.location.origin}/events/${showQrFor.id}/scan`} size={256} />
+              </div>
+              <p className="text-sm text-gray-500 text-center">
+                Scan this QR code with your phone to automatically register your attendance.
+              </p>
             </motion.div>
           </motion.div>
         )}

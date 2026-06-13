@@ -89,5 +89,5 @@ The **`admin`** dashboard provides complete operational control over the platfor
 ---
 
 <div align="center">
-  <p>Built with ❤️ by the GFG Student Chapter</p>
+  <p>Built with ❤️ by Kanishk Kamboj</p>
 </div>

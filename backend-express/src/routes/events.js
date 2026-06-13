@@ -131,6 +131,44 @@ router.post('/', authMiddleware, requireRole(['admin']), validate({ body: create
   }
 });
 
+// Record attendance via QR Code
+router.post('/:id/attend', authMiddleware, async (req, res) => {
+  try {
+    const event_id = parseInt(req.params.id);
+    if (isNaN(event_id)) return res.status(400).json({ error: 'Invalid event ID format' });
+    const user_id = req.user.id;
+
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+
+      // Check if already attended
+      const existing = await client.query('SELECT id FROM event_attendance WHERE event_id = $1 AND user_id = $2', [event_id, user_id]);
+      if (existing.rows.length > 0) {
+        await client.query('ROLLBACK');
+        return res.status(400).json({ error: 'Attendance already recorded' });
+      }
+
+      // Record attendance
+      await client.query('INSERT INTO event_attendance (event_id, user_id) VALUES ($1, $2)', [event_id, user_id]);
+
+      // Award 10 Activity Points
+      await client.query('UPDATE users SET activity_points = activity_points + 10 WHERE id = $1', [user_id]);
+
+      await client.query('COMMIT');
+      res.json({ message: 'Attendance recorded! +10 Activity Points awarded.' });
+    } catch (err) {
+      await client.query('ROLLBACK');
+      throw err;
+    } finally {
+      client.release();
+    }
+  } catch (err) {
+    console.error('Attendance error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // Register for event
 router.post('/:id/register', authMiddleware, async (req, res) => {
   try {
