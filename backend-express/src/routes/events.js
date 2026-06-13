@@ -5,6 +5,7 @@ const { z } = require('zod');
 const validate = require('../middleware/validate');
 const authMiddleware = require('../middleware/auth');
 const requireRole = require('../middleware/rbac');
+const { sendEmailBlast } = require('../utils/emailService');
 
 const getEventsQuerySchema = z.object({
   page: z.string().regex(/^\d+$/).transform(Number).default('1'),
@@ -22,7 +23,8 @@ const createEventSchema = z.object({
   end_date: z.string().datetime(),
   location: z.string().optional(),
   capacity: z.number().int().positive().optional(),
-  image_url: z.string().url().optional()
+  image_url: z.string().url().optional(),
+  send_email: z.boolean().optional()
 });
 
 const updateEventSchema = createEventSchema.partial();
@@ -105,7 +107,7 @@ router.get('/:id', async (req, res) => {
 // Create event
 router.post('/', authMiddleware, requireRole(['admin']), validate({ body: createEventSchema }), async (req, res) => {
   try {
-    const { title, description, event_type, start_date, end_date, location, capacity, image_url } = req.body;
+    const { title, description, event_type, start_date, end_date, location, capacity, image_url, send_email } = req.body;
     const organizer_id = req.user.id;
 
     const result = await pool.query(
@@ -114,6 +116,13 @@ router.post('/', authMiddleware, requireRole(['admin']), validate({ body: create
     );
 
     global.broadcastUpdate('events', { type: 'new', data: result.rows[0] });
+
+    if (send_email) {
+      sendEmailBlast(
+        `🎉 New Event: ${title}`,
+        `<h2>${title}</h2><p>${description}</p><p><strong>When:</strong> ${new Date(start_date).toLocaleString()}</p><a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/events/${result.rows[0].id}">Register now!</a>`
+      );
+    }
 
     res.status(201).json(result.rows[0]);
   } catch (err) {

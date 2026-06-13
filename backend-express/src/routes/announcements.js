@@ -5,6 +5,7 @@ const { z } = require('zod');
 const validate = require('../middleware/validate');
 const authMiddleware = require('../middleware/auth');
 const requireRole = require('../middleware/rbac');
+const { sendEmailBlast } = require('../utils/emailService');
 
 const getAnnouncementsQuerySchema = z.object({
   page: z.string().regex(/^\d+$/).transform(Number).default('1'),
@@ -19,7 +20,8 @@ const createAnnouncementSchema = z.object({
   content: z.string().optional(),
   category: z.string().optional(),
   priority: z.enum(['low', 'medium', 'high', 'critical']).default('low'),
-  image_url: z.string().url().optional()
+  image_url: z.string().url().optional(),
+  send_email: z.boolean().optional()
 });
 
 const updateAnnouncementSchema = createAnnouncementSchema.extend({
@@ -99,7 +101,7 @@ router.get('/:id', async (req, res) => {
 // Create announcement (Requires Auth)
 router.post('/', authMiddleware, requireRole(['admin']), validate({ body: createAnnouncementSchema }), async (req, res) => {
   try {
-    const { title, description, content, category, priority, image_url } = req.body;
+    const { title, description, content, category, priority, image_url, send_email } = req.body;
     const author_id = req.user.id;
 
     const result = await pool.query(
@@ -108,6 +110,13 @@ router.post('/', authMiddleware, requireRole(['admin']), validate({ body: create
     );
 
     global.broadcastUpdate('announcements', { type: 'new', data: result.rows[0] });
+
+    if (send_email) {
+      sendEmailBlast(
+        `📢 New Announcement: ${title}`,
+        `<h2>${title}</h2><p>${description}</p><a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/announcements/${result.rows[0].id}">Read more on the platform</a>`
+      );
+    }
 
     res.status(201).json(result.rows[0]);
   } catch (err) {

@@ -13,6 +13,7 @@ CREATE TABLE users (
   github_id VARCHAR(255) UNIQUE,
   auth_provider VARCHAR(50) DEFAULT 'local',
   bio TEXT,
+  activity_points INTEGER DEFAULT 0,
   joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -57,6 +58,15 @@ CREATE TABLE event_registrations (
   event_id INTEGER NOT NULL REFERENCES events(id) ON DELETE CASCADE,
   user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   registered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(event_id, user_id)
+);
+
+-- Event attendance
+CREATE TABLE event_attendance (
+  id SERIAL PRIMARY KEY,
+  event_id INTEGER NOT NULL REFERENCES events(id) ON DELETE CASCADE,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  scanned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   UNIQUE(event_id, user_id)
 );
 

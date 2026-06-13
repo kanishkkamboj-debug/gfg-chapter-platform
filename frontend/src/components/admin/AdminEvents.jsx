@@ -11,7 +11,8 @@ const AdminEvents = () => {
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({
     title: '', description: '', event_type: 'workshop', 
-    start_date: '', end_date: '', location: '', capacity: '', image_url: ''
+    start_date: '', end_date: '', location: '', capacity: '', image_url: '',
+    send_email: false
   });
 
   const fetchEvents = async () => {
@@ -57,7 +58,8 @@ const AdminEvents = () => {
       setEditingId(null);
       setFormData({
         title: '', description: '', event_type: 'workshop', 
-        start_date: '', end_date: '', location: '', capacity: '', image_url: ''
+        start_date: '', end_date: '', location: '', capacity: '', image_url: '',
+        send_email: false
       });
       fetchEvents();
     } catch (err) {
@@ -103,7 +105,7 @@ const AdminEvents = () => {
         <button 
           onClick={() => {
             setEditingId(null);
-            setFormData({ title: '', description: '', event_type: 'workshop', start_date: '', end_date: '', location: '', capacity: '', image_url: '' });
+            setFormData({ title: '', description: '', event_type: 'workshop', start_date: '', end_date: '', location: '', capacity: '', image_url: '', send_email: false });
             setIsCreating(true);
           }}
           className="px-6 py-3 bg-[#00FF88] text-[#0a1118] font-bold rounded-xl flex items-center gap-2 hover:shadow-neon transition-shadow"
@@ -223,6 +225,13 @@ const AdminEvents = () => {
                     <input type="number" className="w-full bg-[#112218] border border-[#1a3324] rounded-xl p-3 text-white" value={formData.capacity} onChange={e => setFormData({...formData, capacity: e.target.value})} />
                   </div>
                 </div>
+
+                {!editingId && (
+                  <div className="flex items-center gap-2 mt-4">
+                    <input type="checkbox" id="send_email" checked={formData.send_email} onChange={e => setFormData({...formData, send_email: e.target.checked})} className="w-4 h-4 rounded border-[#1a3324] bg-[#112218]" />
+                    <label htmlFor="send_email" className="text-sm text-[#00FF88] font-bold">Send Email Blast to all members</label>
+                  </div>
+                )}
 
                 <div className="flex justify-end gap-4 mt-8">
                   <button type="button" onClick={() => setIsCreating(false)} className="px-6 py-3 border border-[#1a3324] text-white hover:bg-[#112218] rounded-xl font-bold">Cancel</button>

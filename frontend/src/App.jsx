@@ -20,6 +20,7 @@ const ResourcesPage = lazy(() => import('./pages/Resources'));
 const GalleryPage = lazy(() => import('./pages/Gallery'));
 const ContactPage = lazy(() => import('./pages/Contact'));
 const HallOfFamePage = lazy(() => import('./pages/HallOfFame'));
+const LeaderboardPage = lazy(() => import('./pages/Leaderboard'));
 const DashboardPage = lazy(() => import('./pages/Dashboard'));
 const PracticePortal = lazy(() => import('./pages/PracticePortal'));
 const BlogsPage = lazy(() => import('./pages/Blogs'));
@@ -126,6 +127,7 @@ const AnimatedRoutes = () => {
           <Route path="/contact" element={<PageWrapper><ContactPage /></PageWrapper>} />
           <Route path="/achievements" element={<PageWrapper><HallOfFamePage /></PageWrapper>} />
           <Route path="/hall-of-fame" element={<PageWrapper><HallOfFamePage /></PageWrapper>} />
+          <Route path="/leaderboard" element={<PageWrapper><LeaderboardPage /></PageWrapper>} />
           <Route path="/practice" element={<PageWrapper><PracticePortal /></PageWrapper>} />
           <Route path="/blogs" element={<PageWrapper><BlogsPage /></PageWrapper>} />
           <Route path="/blog" element={<PageWrapper><BlogsPage /></PageWrapper>} />

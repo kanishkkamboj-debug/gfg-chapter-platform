@@ -10,7 +10,7 @@ const AdminAnnouncements = () => {
   const [isCreating, setIsCreating] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({
-    title: '', description: '', content: '', category: 'General', priority: 'low', is_pinned: false, image_url: ''
+    title: '', description: '', content: '', category: 'General', priority: 'low', is_pinned: false, image_url: '', send_email: false
   });
 
   const fetchAnnouncements = async () => {
@@ -51,7 +51,7 @@ const AdminAnnouncements = () => {
       setIsCreating(false);
       setEditingId(null);
       setFormData({
-        title: '', description: '', content: '', category: 'General', priority: 'low', is_pinned: false, image_url: ''
+        title: '', description: '', content: '', category: 'General', priority: 'low', is_pinned: false, image_url: '', send_email: false
       });
       fetchAnnouncements();
     } catch (err) {
@@ -96,7 +96,7 @@ const AdminAnnouncements = () => {
         <button 
           onClick={() => {
             setEditingId(null);
-            setFormData({ title: '', description: '', content: '', category: 'General', priority: 'low', is_pinned: false, image_url: '' });
+            setFormData({ title: '', description: '', content: '', category: 'General', priority: 'low', is_pinned: false, image_url: '', send_email: false });
             setIsCreating(true);
           }}
           className="px-6 py-3 bg-[#00FF88] text-[#0a1118] font-bold rounded-xl flex items-center gap-2 hover:shadow-[0_0_20px_rgba(0,255,136,0.4)] transition-all"
@@ -190,6 +190,12 @@ const AdminAnnouncements = () => {
                   <input type="checkbox" id="is_pinned" checked={formData.is_pinned} onChange={e => setFormData({...formData, is_pinned: e.target.checked})} className="w-4 h-4 rounded border-[#1a3324] bg-[#112218]" />
                   <label htmlFor="is_pinned" className="text-sm text-[#a3b8cc]">Pin to top of notifications</label>
                 </div>
+                {!editingId && (
+                  <div className="flex items-center gap-2 mt-2">
+                    <input type="checkbox" id="send_email" checked={formData.send_email} onChange={e => setFormData({...formData, send_email: e.target.checked})} className="w-4 h-4 rounded border-[#1a3324] bg-[#112218]" />
+                    <label htmlFor="send_email" className="text-sm text-[#00FF88] font-bold">Send Email Blast to all members</label>
+                  </div>
+                )}
 
                 <div className="flex justify-end gap-4 mt-8">
                   <button type="button" onClick={() => setIsCreating(false)} className="px-6 py-3 border border-[#1a3324] text-white hover:bg-[#112218] rounded-xl font-bold">Cancel</button>

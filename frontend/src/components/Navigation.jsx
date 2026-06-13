@@ -27,6 +27,9 @@ const Navigation = () => {
     { name: 'About Us', path: '/about' },
     { name: 'Events', path: '/events' },
     { name: 'Blogs', path: '/blogs' },
+    { name: 'Community Forum', path: '/community' },
+    { name: 'Leaderboard', path: '/leaderboard' },
+    { name: 'Hall of Fame', path: '/hall-of-fame' },
     { name: 'Resources', path: '/resources' },
     { name: 'Team', path: '/team' },
     { name: 'Gallery', path: '/gallery' }
